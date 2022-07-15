@@ -1,4 +1,4 @@
 #!/bin/sh
-# For local use, use 'localhost' for common name (host name)
-# Other fields don't matter
+# For local development: use 'localhost' for common name (host name);
+# other fields can be left blank.
 openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -nodes -days 3650
