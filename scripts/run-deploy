@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+# Run this command from the directory to be deployed:
+# <project-root>/scripts/run-deploy
+# This script intentially does not rely on gcloud config;
+# settings should be explicitly managed through env.
+# Note: direnv is your friend: https://direnv.net/. Use
+# your own <project-root>/.envrc for testing.
+set -eu
+gcloud run deploy "$SERVICE" \
+		--project "$PROJECT" \
+		--region "$REGION" \
+		--allow-unauthenticated \
+		--source .

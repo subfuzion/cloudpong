@@ -1,0 +1,7 @@
+# https://cloud.google.com/sdk/gcloud/reference/topic/gcloudignore
+.env*
+.gcloudignore
+.git/
+.gitignore
+node_modules/
+*~
