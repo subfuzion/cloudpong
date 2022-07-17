@@ -1,5 +1,4 @@
-import http2 from "http2";
-import fs from "fs";
+import http2 from "node:http2";
 
 // ====================================
 // routing
@@ -47,10 +46,7 @@ const router = (stream, headers) => {
 // server
 // ====================================
 
-const server = http2.createSecureServer({
-  key: fs.readFileSync("key.pem"),
-  cert: fs.readFileSync("cert.pem")
-});
+const server = http2.createServer();
 
 server.on("stream", router);
 server.on("error", (err) => console.error(err));
@@ -61,4 +57,5 @@ server.on("session", session => {
   session.on("error", err => console.error("session error", err));
 });
 
-server.listen(8443);
+const port = Number(process.env.PORT) || 8080;
+server.listen(port);

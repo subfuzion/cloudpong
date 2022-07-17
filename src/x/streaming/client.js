@@ -1,9 +1,6 @@
-import http2 from "http2";
-import fs from "fs";
+import http2 from "node:http2";
 
-const client = http2.connect("https://localhost:8443", {
-  ca: fs.readFileSync("cert.pem")
-});
+const client = http2.connect("http://localhost:8080");
 
 client.on("error", (err) => console.error(err));
 
