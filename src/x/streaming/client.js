@@ -1,4 +1,4 @@
-import http2 from "node:http2";
+import http2 from "http2";
 
 const client = http2.connect("http://localhost:8080");
 
