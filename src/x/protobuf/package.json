@@ -1,0 +1,14 @@
+{
+  "name": "protobuf-demo",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "protobufjs": "~7.0.0"
+  },
+  "devDependencies": {
+    "protobufjs-cli": "~1.0.0"
+  }
+}
