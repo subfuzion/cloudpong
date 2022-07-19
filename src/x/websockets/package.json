@@ -1,0 +1,14 @@
+{
+  "author": "",
+  "name": "serverstats",
+  "version": "0.0.0",
+  "repository": "websockets/ws",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@root/uuid": "^1.0.1",
+    "express": "^4.16.4",
+    "ws": "^8.8.1"
+  }
+}
