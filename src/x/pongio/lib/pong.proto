@@ -2,6 +2,13 @@ syntax = "proto3";
 
 package pong;
 
+// New location for ball
+// (client should animate motion to new location)
+message MoveBall {
+  sint32 x = 1;
+  sint32 y = 2;
+}
+
 // Player presses up/down arrow to request paddle movement
 // (server is authoritative for paddle locations)
 message MovePaddleRequest {
@@ -14,4 +21,3 @@ message MovePaddleRequest {
 message MovePaddle {
   sint32 y = 1;
 }
-

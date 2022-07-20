@@ -11,7 +11,24 @@ describe("Basic serialization test suite", function () {
   //   const final = pongMessages.decodeMovePaddleRequest(buffer);
   //   assert.equal(final.direction, original);
   // });
+  //
+  // if .expect not supplied, assert will test against .original
+  // if assert needs to test a property on the actual result, set .finalProperty
+  // set .assertMethod to the approprate assert test (default is assert.equal)
   const tests = [
+    {
+      name: "should convert between MoveBall (with scalar) and buffer",
+      type: "MoveBall",
+      original: [10, 20],
+      assertMethod: "deepEqual",
+      expect: {x: 10, y: 20},
+    },
+    {
+      name: "should convert between MoveBall (with object) and buffer",
+      type: "MoveBall",
+      original: {x: 10, y: 20},
+      assertMethod: "deepEqual",
+    },
     {
       name: "should convert between MovePaddleRequest (with scalar) and buffer",
       type: "MovePaddleRequest",
@@ -63,9 +80,14 @@ describe("Basic serialization test suite", function () {
 
   for (const test of tests) {
     it(test.name, function () {
-      const buffer = pongMessages[`encode${test.type}`](test.original);
+      let buffer;
+      if (Array.isArray(test.original)) {
+        buffer = pongMessages[`encode${test.type}`](...test.original);
+      } else {
+        buffer = pongMessages[`encode${test.type}`](test.original);
+      }
       const final = pongMessages[`decode${test.type}`](buffer);
-      assert[test.assertMethod](test.finalProperty ? final[test.finalProperty] : final,
+      assert[test.assertMethod ? test.assertMethod : "equal"](test.finalProperty ? final[test.finalProperty] : final,
         test.expect ? test.expect : test.original);
     });
   }
