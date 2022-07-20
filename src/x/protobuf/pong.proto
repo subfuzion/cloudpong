@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package pong;
 
+// Player presses up/down arrow to request paddle movement
 message PaddleMoveRequest {
+  // negative: up, positive: down
   sint32 direction = 1; // js: messageType
 }
