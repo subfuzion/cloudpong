@@ -10,7 +10,7 @@ const PaddleMoveRequest = root.lookupType("pong.PaddleMoveRequest");
 // Exemplary payload
 let payload = {direction: -1};
 
-if (process.env.NODE_ENV == "dev") {
+if (process.env.NODE_ENV === "dev") {
   // Verify the payload if necessary (i.e. when possibly incomplete or invalid)
   const errMsg = PaddleMoveRequest.verify(payload);
   if (errMsg) throw Error(errMsg);
@@ -36,7 +36,7 @@ const payload2 = PaddleMoveRequest.toObject(message, {
 });
 
 // Full round trip: convert back one more time
-if (process.env.NODE_ENV == "dev") {
+if (process.env.NODE_ENV === "dev") {
   // Verify the payload if necessary (i.e. when possibly incomplete or invalid)
   const errMsg = PaddleMoveRequest.verify(payload2);
   if (errMsg) throw Error(errMsg);
