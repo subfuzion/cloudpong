@@ -3,5 +3,5 @@ syntax = "proto3";
 package pong;
 
 message PaddleMoveRequest {
-  sfixed32 direction = 1; // js: messageType
+  sint32 direction = 1; // js: messageType
 }
