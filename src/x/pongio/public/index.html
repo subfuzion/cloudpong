@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Server stats</title>
+    <style>
+      table, td {
+        border: 1px solid #333;
+      }
+
+      thead {
+        background-color: #333;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Server stats</h1>
+    <table>
+      <thead>
+        <tr>
+          <th colspan="2">Memory usage</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Session ID</td>
+          <td id="id"></td>
+        </tr>
+        <tr>
+          <td>RSS</td>
+          <td id="rss"></td>
+        </tr>
+        <tr>
+          <td>Heap total</td>
+          <td id="heapTotal"></td>
+        </tr>
+        <tr>
+          <td>Heap used</td>
+          <td id="heapUsed"></td>
+        </tr>
+        <tr>
+          <td>External</td>
+          <td id="external"></td>
+        </tr>
+      </tbody>
+    </table>
+    <script>
+      (() => {
+        const id = document.getElementById('id');
+        const rss = document.getElementById('rss');
+        const heapTotal = document.getElementById('heapTotal');
+        const heapUsed = document.getElementById('heapUsed');
+        const external = document.getElementById('external');
+        const ws = new WebSocket(`ws://${location.host}`);
+
+        ws.onmessage = event => {
+          const {id: i, stats} = JSON.parse(event.data);
+
+          id.textContent = i;
+          rss.textContent = stats.rss;
+          heapTotal.textContent = stats.heapTotal;
+          heapUsed.textContent = stats.heapUsed;
+          external.textContent = stats.external;
+        };
+      })();
+    </script>
+  </body>
+</html>

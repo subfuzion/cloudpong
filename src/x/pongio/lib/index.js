@@ -1,4 +1,3 @@
-// https://github.com/protobufjs/protobuf.js
 import assert from "assert/strict";
 import protobuf from "protobufjs";
 

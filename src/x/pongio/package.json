@@ -1,0 +1,17 @@
+{
+  "name": "pongio",
+  "private": true,
+  "version": "0.0.0",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@root/uuid": "^1.0.1",
+    "express": "^4.16.4",
+    "protobufjs": "~7.0.0",
+    "ws": "^8.8.1"
+  },
+  "devDependencies": {
+    "protobufjs-cli": "~1.0.0"
+  }
+}
