@@ -1,46 +1,67 @@
-import assert from "assert/strict";
 import protobuf from "protobufjs";
+import path from "path";
+import {fileURLToPath} from "url";
 
-const {err, root} = await protobuf.load("pong.proto");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const {err, root} = await protobuf.load(path.join(__dirname, "pong.proto"));
 if (err) throw err;
 
-// Obtain a message type (package.message)
-const PaddleMoveRequest = root.lookupType("pong.PaddleMoveRequest");
+const MovePaddleRequest = root.lookupType("pong.MovePaddleRequest");
+const MovePaddle = root.lookupType("pong.MovePaddle");
 
-// Exemplary payload
-let payload = {direction: -1};
+export class PongMessages {
+  // Encode a message to an Uint8Array (browser) or Buffer (node)
+  // direction: number (negative for up, positive for down)
+  // | object { direction: number }
+  encodeMovePaddleRequest(direction) {
+    let payload = direction;
+    if (typeof payload === "number") {
+      payload = {direction: direction};
+    }
+    // normalize number
+    payload.direction = payload.direction < 0 ? -1 : payload.direction > 0 ? 1 : 0;
+    if (process.env.NODE_ENV === "dev") {
+      // Verify the payload if necessary (i.e. when possibly incomplete or invalid)
+      const errMsg = MovePaddleRequest.verify(payload);
+      if (errMsg) throw Error(errMsg);
+    }
+    const message = MovePaddleRequest.create(payload);
+    return MovePaddleRequest.encode(message).finish();
+  }
 
-if (process.env.NODE_ENV === "dev") {
-  // Verify the payload if necessary (i.e. when possibly incomplete or invalid)
-  const errMsg = PaddleMoveRequest.verify(payload);
-  if (errMsg) throw Error(errMsg);
+  // Decode an Uint8Array (browser) or Buffer (node) to an object
+  // returns { direction: number }
+  decodeMovePaddleRequest(buffer) {
+    const message = MovePaddleRequest.decode(buffer);
+    return MovePaddleRequest.toObject(message, {
+      longs: String, enums: String, bytes: String,
+    });
+  }
+
+  // Encode a message to an Uint8Array (browser) or Buffer (node)
+  // y: number (new vertical location) | object { y: number }
+  encodeMovePaddle(y) {
+    let payload = y;
+    if (typeof payload === "number") {
+      payload = {y: y};
+    }
+    if (process.env.NODE_ENV === "dev") {
+      // Verify the payload if necessary (i.e. when possibly incomplete or invalid)
+      const errMsg = MovePaddle.verify(payload);
+      if (errMsg) throw Error(errMsg);
+    }
+    const message = MovePaddle.create(payload);
+    return MovePaddle.encode(message).finish();
+  }
+
+  // Decode an Uint8Array (browser) or Buffer (node) to an object
+  // returns { y: number }
+  decodeMovePaddle(buffer) {
+    const message = MovePaddle.decode(buffer);
+    return MovePaddle.toObject(message, {
+      longs: String, enums: String, bytes: String,
+    });
+  }
 }
-
-// Create a new message
-let message = PaddleMoveRequest.create(payload); // or use .fromObject if conversion is necessary
-
-// Encode a message to an Uint8Array (browser) or Buffer (node)
-const buffer = PaddleMoveRequest.encode(message).finish();
-// ... do something with buffer
-
-// Decode an Uint8Array (browser) or Buffer (node) to a message
-message = PaddleMoveRequest.decode(buffer);
-// ... do something with message
-console.log(message);
-
-// If the application uses length-delimited buffers, there is also encodeDelimited and decodeDelimited.
-
-// Maybe convert the message back to a plain object
-const payload2 = PaddleMoveRequest.toObject(message, {
-  longs: String, enums: String, bytes: String, // see ConversionOptions
-});
-
-// Full round trip: convert back one more time
-if (process.env.NODE_ENV === "dev") {
-  // Verify the payload if necessary (i.e. when possibly incomplete or invalid)
-  const errMsg = PaddleMoveRequest.verify(payload2);
-  if (errMsg) throw Error(errMsg);
-}
-let message2 = PaddleMoveRequest.create(payload2);
-console.log(message2);
-assert.deepEqual(message2, message);

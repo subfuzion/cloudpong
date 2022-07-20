@@ -3,7 +3,15 @@ syntax = "proto3";
 package pong;
 
 // Player presses up/down arrow to request paddle movement
-message PaddleMoveRequest {
+// (server is authoritative for paddle locations)
+message MovePaddleRequest {
   // negative: up, positive: down
   sint32 direction = 1;
 }
+
+// New vertical location for paddle
+// (client should animate motion to new location)
+message MovePaddle {
+  sint32 y = 1;
+}
+
