@@ -17,6 +17,18 @@ describe("Basic serialization test suite", function () {
   // set .assertMethod to the approprate assert test (default is assert.equal)
   const tests = [
     {
+      name: "should convert between EchoRequest and buffer",
+      type: "EchoRequest",
+      original: 10,
+      finalProperty: "data",
+    },
+    {
+      name: "should convert between EchoReply and buffer",
+      type: "EchoReply",
+      original: 10,
+      finalProperty: "data",
+    },
+    {
       name: "should convert between MoveBall (with scalar) and buffer",
       type: "MoveBall",
       original: [10, 20],
@@ -34,7 +46,6 @@ describe("Basic serialization test suite", function () {
       type: "MovePaddleRequest",
       original: -1,
       finalProperty: "direction",
-      assertMethod: "equal",
     },
     {
       name: "should convert between MovePaddleRequest (with object) and buffer",

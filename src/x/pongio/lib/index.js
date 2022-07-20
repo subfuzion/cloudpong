@@ -18,8 +18,12 @@ const MovePaddle = root.lookupType("pong.MovePaddle");
 export class PongMessages {
 
   // Encode a message to an Uint8Array (browser) or Buffer (node)
+  // data: number | object { data: number }
   encodeEchoRequest(data) {
     let payload = data;
+    if (typeof payload === "number") {
+      payload = {data: data};
+    }
     if (process.env.NODE_ENV === "dev") {
       // Verify the payload if necessary (i.e. when possibly incomplete or invalid)
       const errMsg = EchoRequest.verify(payload);
@@ -30,7 +34,7 @@ export class PongMessages {
   }
 
   // Decode an Uint8Array (browser) or Buffer (node) to an object
-  // returns { x: number, y: number }
+  // returns { data: number }
   decodeEchoRequest(buffer) {
     const message = EchoRequest.decode(buffer);
     return EchoRequest.toObject(message, {
@@ -39,8 +43,12 @@ export class PongMessages {
   }
 
   // Encode a message to an Uint8Array (browser) or Buffer (node)
+  // data: number | object { data: number }
   encodeEchoReply(data) {
     let payload = data;
+    if (typeof payload === "number") {
+      payload = {data: data};
+    }
     if (process.env.NODE_ENV === "dev") {
       // Verify the payload if necessary (i.e. when possibly incomplete or invalid)
       const errMsg = EchoReply.verify(payload);
@@ -51,7 +59,7 @@ export class PongMessages {
   }
 
   // Decode an Uint8Array (browser) or Buffer (node) to an object
-  // returns { x: number, y: number }
+  // returns { data: number }
   decodeEchoReply(buffer) {
     const message = EchoReply.decode(buffer);
     return EchoReply.toObject(message, {
