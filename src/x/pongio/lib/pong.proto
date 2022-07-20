@@ -2,11 +2,24 @@ syntax = "proto3";
 
 package pong;
 
+message Timestamp {
+  int64 seconds = 1;
+  int32 nanos = 2;
+}
+
+message EchoRequest {
+  int32 data = 1;
+}
+
+message EchoReply {
+  int32 data = 1;
+}
+
 // New location for ball
-// (client should animate motion to new location)
+// (client should animate ball moving to new location)
 message MoveBall {
-  sint32 x = 1;
-  sint32 y = 2;
+  int32 x = 1;
+  int32 y = 2;
 }
 
 // Player presses up/down arrow to request paddle movement
@@ -17,7 +30,12 @@ message MovePaddleRequest {
 }
 
 // New vertical location for paddle
-// (client should animate motion to new location)
+// (client should animate paddle moving to new location)
 message MovePaddle {
   sint32 y = 1;
+}
+
+// score = `${points[0]}:${points[1]}`
+message UpdateScore {
+  repeated sint32 points = 1;
 }
