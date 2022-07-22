@@ -1,4 +1,3 @@
-import {v4 as uuid} from "uuid";
 import {WebSocket} from "ws";
 import {Client} from "./client.js";
 
@@ -30,8 +29,7 @@ export class Connections {
       this.delete(ws);
     });
 
-    const id = uuid();
-    const client = new Client(ws, id);
+    const client = new Client(ws);
     this.connections.set(ws, client);
 
     if (!intervalId) {
@@ -51,8 +49,8 @@ export class Connections {
   }
 
   broadcast(message: string): void {
-    for (const [ws, client] of this.connections) {
-      ws.send(message, (err) => {
+    for (const client of this.connections.values()) {
+      client.send(message, (err) => {
         console.log(err);
       });
     }
@@ -62,12 +60,37 @@ export class Connections {
     // get stats outside of the loop and stringify early
     const stats = JSON.stringify(process.memoryUsage());
     const statsPostfix = "\", \"stats\": " + stats + "}";
-    for (const [ws, client] of this.connections) {
+    for (const client of this.connections.values()) {
       // no stringification, just concatenate in the loop
       const message = "{\"id\": \"" + client.id + statsPostfix;
-      ws.send(message, err => {
+      client.send(message, err => {
         if (err) console.log(err);
       });
     }
   }
+
+  // Broadcast using generators
+  //
+  // broadcastx(it: Generator<[Client, string]>): void {
+  //   for (const [client, message] of it) {
+  //     client.send(message, err => {
+  //       if (err) console.log(err);
+  //     });
+  //   }
+  // }
+  //
+  // broadcastStats(): void {
+  //   const self = this;
+  //   const statsGenerator = function* (): Generator<[Client, string]> {
+  //     // get stats outside of the loop and stringify early
+  //     const stats = JSON.stringify(process.memoryUsage());
+  //     const statsPostfix = "\", \"stats\": " + stats + "}";
+  //     for (const client of self.connections.values()) {
+  //       // no stringification, just concatenate in the loop
+  //       const message = "{\"id\": \"" + client.id + statsPostfix;
+  //       yield [client, message];
+  //     }
+  //   };
+  //   self.broadcastx(statsGenerator());
+  // }
 }
