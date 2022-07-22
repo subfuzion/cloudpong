@@ -10,7 +10,7 @@ const app = express();
 app.use(express.static(path.join(__dirname, "/public")));
 
 const server = createServer(app);
-const wss = new WebSocketServer({server});
+const wss = new WebSocketServer({server: server});
 
 const connections = new Map();
 let intervalId;
@@ -46,7 +46,7 @@ function removeConnection(ws) {
   }
 }
 
-wss.on("connection", ws  => {
+wss.on("connection", ws => {
   console.log("open event");
   ws.on("error", err => {
     console.log("error event: " + err.message);

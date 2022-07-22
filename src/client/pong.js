@@ -4,6 +4,27 @@ const player1 = {x: 30, y: 250, height: 100, width: 20};
 const player2 = {x: screenWidth - 50, y: 250, height: 100, width: 20};
 const ball = {x: 250, y: 100, vx: 2, vy: 2};
 
+// Not really the stats we want, just an example of receiving
+// stats updates being "broadcast" to all clients by the server
+(() => {
+  const id = document.getElementById("id");
+  const rss = document.getElementById("rss");
+  const heapTotal = document.getElementById("heapTotal");
+  const heapUsed = document.getElementById("heapUsed");
+  const external = document.getElementById("external");
+  const ws = new WebSocket(`ws://${location.host}`);
+
+  ws.onmessage = event => {
+    const {id: i, stats} = JSON.parse(event.data);
+
+    id.textContent = i;
+    rss.textContent = stats.rss;
+    heapTotal.textContent = stats.heapTotal;
+    heapUsed.textContent = stats.heapUsed;
+    external.textContent = stats.external;
+  };
+})();
+
 function setup() {
   createCanvas(screenWidth, screenHeight);
   frameRate(60);
