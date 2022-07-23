@@ -7,18 +7,41 @@ export class PongServer {
   readonly server: http.Server;
   readonly wss: WebSocketServer;
   readonly connections = new Connections();
+  private intervalMs = 100;
 
   constructor(server: http.Server) {
     this.server = server;
     this.wss = new WebSocketServer({server: server});
 
+    this.connections.on("wserror", (err: Error, client: Client) => {
+      console.log(`error: websocket (${client.id}):`, err);
+    });
+
+    this.connections.on("wsclose", client => {
+      console.log(`close: websocket (${client.id})`);
+    });
+
+    this.connections.on("wsdelete", client => {
+      if (!this.connections.size) {
+        // After the last client connection is closed, clear the
+        // interval to stop broadcasting stats.
+        this.connections.stopBroadcasting();
+        console.log("stopped heartbeat broadcast");
+      }
+    });
+
     this.wss.on("listening", () => {
-      console.log("wss listening");
+      console.log("websocket server listening");
     });
 
     this.wss.on("connection", ws => {
-      console.log("open event");
+      console.log("websocket server connection");
       this.connections.add(ws);
+      if (this.connections.size) {
+        // Start an interval for the first client; broadcast stats every 100 ms for all
+        // connected clients.
+        this.connections.startBroadcasting(this.stats.bind(this), this.intervalMs);
+      }
     });
   }
 
@@ -27,6 +50,7 @@ export class PongServer {
     return this;
   }
 
+  // stats generator.
   // This is an example of optimizing string generation
   // (avoids using JSON.stringify inside a loop).
   // broadcast() can be invoked with different generators.
@@ -40,4 +64,5 @@ export class PongServer {
       yield [client, message];
     }
   }
+
 }
