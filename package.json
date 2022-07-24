@@ -5,7 +5,6 @@
   "description": "Demo multi-player pong on Cloud Run with MongoDB",
   "license": "Apache-2.0",
   "type": "module",
-  "main": "dist/main.js",
   "scripts": {
     "build": "tsc -p src/server && mkdir -p dist/public && cp -r src/client/* dist/public/",
     "clean": "rm -rf dist",
@@ -14,7 +13,8 @@
     "dev": "NODE_ENV=development concurrently \"npm run watch\" \"nodemon -q --trace-warnings dist/main.js\"",
     "prestart": "npm run build",
     "start": "NODE_ENV=production node dist/main.js",
-    "test": "echo 'No tests' && exit 0"
+    "test": "echo 'No tests' && exit 0",
+    "webpack": "webpack"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
@@ -32,7 +32,11 @@
     "chokidar-cli": "^3.0.0",
     "concurrently": "^7.2.2",
     "del": "^6.1.1",
+    "node-polyfill-webpack-plugin": "^2.0.0",
     "nodemon": "^2.0.19",
-    "typescript": "^4.7.4"
+    "ts-loader": "^9.3.1",
+    "typescript": "^4.7.4",
+    "webpack": "^5.73.0",
+    "webpack-cli": "^4.10.0"
   }
 }
