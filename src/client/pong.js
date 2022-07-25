@@ -12,11 +12,14 @@ const ball = {x: 250, y: 100, vx: 2, vy: 2};
   const heapTotal = document.getElementById("heapTotal");
   const heapUsed = document.getElementById("heapUsed");
   const external = document.getElementById("external");
-  const ws = new WebSocket(`ws://${location.host}`);
+  if (!(id && rss && heapTotal && heapUsed && external)) {
+    console.log("error getting stats elements");
+    return;
+  }
 
+  const ws = new WebSocket(`ws://${location.host}`);
   ws.onmessage = event => {
     const {id: i, stats} = JSON.parse(event.data);
-
     id.textContent = i;
     rss.textContent = stats.rss;
     heapTotal.textContent = stats.heapTotal;

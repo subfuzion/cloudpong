@@ -7,7 +7,7 @@ const __dirname = path.dirname(__filename);
 
 export const app = express();
 
-// Serve public UI assets on root route /
+// Serve client UI assets on root route /
 app.use(express.static(path.join(__dirname, "public")));
 
 // Don't report 404 for favicon, if not found (this handler must be last).

@@ -5,8 +5,7 @@ import {fileURLToPath} from "url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const {err, root} = await protobuf.load(path.join(__dirname, "pong.proto"));
-if (err) throw err;
+const root = await protobuf.load(path.join(__dirname, "pong.proto"));
 
 const Timestamp = root.lookupType("pong.Timestamp");
 const EchoRequest = root.lookupType("pong.EchoRequest");
@@ -19,6 +18,9 @@ export class PongMessages {
 
   // Encode a message to an Uint8Array (browser) or Buffer (node)
   // data: number | object { data: number }
+  /**
+   * @param {any} data
+   */
   encodeEchoRequest(data) {
     let payload = data;
     if (typeof payload === "number") {
@@ -35,6 +37,9 @@ export class PongMessages {
 
   // Decode an Uint8Array (browser) or Buffer (node) to an object
   // returns { data: number }
+  /**
+   * @param {Uint8Array | protobuf.Reader} buffer
+   */
   decodeEchoRequest(buffer) {
     const message = EchoRequest.decode(buffer);
     return EchoRequest.toObject(message, {
@@ -44,6 +49,9 @@ export class PongMessages {
 
   // Encode a message to an Uint8Array (browser) or Buffer (node)
   // data: number | object { data: number }
+  /**
+   * @param {any} data
+   */
   encodeEchoReply(data) {
     let payload = data;
     if (typeof payload === "number") {
@@ -60,6 +68,9 @@ export class PongMessages {
 
   // Decode an Uint8Array (browser) or Buffer (node) to an object
   // returns { data: number }
+  /**
+   * @param {Uint8Array | protobuf.Reader} buffer
+   */
   decodeEchoReply(buffer) {
     const message = EchoReply.decode(buffer);
     return EchoReply.toObject(message, {
@@ -69,6 +80,10 @@ export class PongMessages {
 
   // Encode a message to an Uint8Array (browser) or Buffer (node)
   // x, y: number (coordinates) | object { x: number, y: number }
+  /**
+   * @param {any} x
+   * @param {any} y
+   */
   encodeMoveBall(x, y) {
     let payload = x;
     if (typeof payload === "number") {
@@ -85,6 +100,9 @@ export class PongMessages {
 
   // Decode an Uint8Array (browser) or Buffer (node) to an object
   // returns { x: number, y: number }
+  /**
+   * @param {Uint8Array | protobuf.Reader} buffer
+   */
   decodeMoveBall(buffer) {
     const message = MoveBall.decode(buffer);
     return MoveBall.toObject(message, {
@@ -95,6 +113,9 @@ export class PongMessages {
   // Encode a message to an Uint8Array (browser) or Buffer (node)
   // direction: number (negative for up, positive for down)
   // | object { direction: number }
+  /**
+   * @param {any} direction
+   */
   encodeMovePaddleRequest(direction) {
     let payload = direction;
     if (typeof payload === "number") {
@@ -113,6 +134,9 @@ export class PongMessages {
 
   // Decode an Uint8Array (browser) or Buffer (node) to an object
   // returns { direction: number }
+  /**
+   * @param {Uint8Array | protobuf.Reader} buffer
+   */
   decodeMovePaddleRequest(buffer) {
     const message = MovePaddleRequest.decode(buffer);
     return MovePaddleRequest.toObject(message, {
@@ -122,6 +146,9 @@ export class PongMessages {
 
   // Encode a message to an Uint8Array (browser) or Buffer (node)
   // y: number (new vertical location) | object { y: number }
+  /**
+   * @param {any} y
+   */
   encodeMovePaddle(y) {
     let payload = y;
     if (typeof payload === "number") {
@@ -138,6 +165,9 @@ export class PongMessages {
 
   // Decode an Uint8Array (browser) or Buffer (node) to an object
   // returns { y: number }
+  /**
+   * @param {Uint8Array | protobuf.Reader} buffer
+   */
   decodeMovePaddle(buffer) {
     const message = MovePaddle.decode(buffer);
     return MovePaddle.toObject(message, {
