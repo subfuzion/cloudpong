@@ -19,7 +19,7 @@ export default {
       {
         from: "./src/client",
         globOptions: {
-          ignore: ["**/.js", "**/.ts", "**.tsx"],
+          ignore: ["**/*.js", "**/*.ts", "**/*.tsx"],
         }
       },
     ],

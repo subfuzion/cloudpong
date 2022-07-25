@@ -6,16 +6,14 @@
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {
-    "build0": "tsc -p src/server && mkdir -p dist/public && cp -r src/server/client/* dist/public/",
-    "build": "tsc && mkdir -p dist/public && cp -r src/server/client/* dist/public/",
     "clean": "rm -rf dist",
-    "watch": "chokidar \"client/**/*\" \"src/server/**/*\" -c \"npm run build\"",
+    "build": "tsc && webpack",
+    "watch": "chokidar \"src/client/**/*\" \"src/lib\" \"src/server/**/*\" -c \"npm run build\"",
     "predev": "npm run build",
-    "dev": "NODE_ENV=development concurrently \"npm run watch\" \"nodemon -q --trace-warnings dist/main.js\"",
+    "dev": "NODE_ENV=development concurrently \"npm run watch\" \"nodemon -q --trace-warnings dist/server/main.js\"",
     "prestart": "npm run build",
-    "start": "NODE_ENV=production node dist/main.js",
-    "test": "echo 'No tests' && exit 0",
-    "webpack": "webpack"
+    "start": "NODE_ENV=production node dist/server/main.js",
+    "test": "echo 'No tests' && exit 0"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
