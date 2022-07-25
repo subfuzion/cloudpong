@@ -1,5 +1,5 @@
 import assert from "assert/strict";
-import {pong} from "./pong.js";
+import {pong} from "./pong.ts";
 
 // Exemplary payload
 let payload = {direction: -1};
