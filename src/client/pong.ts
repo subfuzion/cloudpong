@@ -1,40 +1,115 @@
 import P5 from "p5";
 
+class ChangeEvent {
+  get type(): string {
+    return this.constructor.name;
+  }
+}
+
+class BallChangeEvent extends ChangeEvent {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+
+  constructor(x: number, y: number, vx: number, vy: number) {
+    super();
+    this.x = x;
+    this.y = y;
+    this.vx = vx;
+    this.vy = vy;
+  }
+}
+
+class PaddleChangeEvent extends ChangeEvent {
+  y: Array<number>;
+
+  constructor(y: Array<number>) {
+    super();
+    this.y = y;
+  }
+}
+
 class PongEngine {
-  cb: ((e: PongState) => void) | null = null;
+  screenWidth: number;
+  screenHeight: number;
+  table: Table;
+  ball: Ball;
+  player1: Paddle;
+  player2: Paddle;
+
+  cb: ((e: ChangeEvent) => void) | null = null;
 
   constructor() {
+    this.screenWidth = 600;
+    this.screenHeight = 370;
+
+    this.table = new Table(0, 0, this.screenWidth, this.screenHeight);
+    this.table.background = "black";
+
+    this.ball = new Ball(250, 100);
+    this.ball.vx = 4;
+    this.ball.vy = 2;
+
+    this.player1 = new Paddle(30, 250);
+    this.player1.vy = 4;
+
+    this.player2 = new Paddle(this.table.width - 50, 250);
+    this.player2.vy = 4;
+
+    this.table.add(this.ball, this.player1, this.player2);
   }
 
-  onStateChange(cb: (e: PongState) => void): void {
+  onStateChange(cb: (e: ChangeEvent) => void): void {
     this.cb = cb;
   }
 
   start() {
-    const screenWidth = 600;
-    const screenHeight = 370;
+    setInterval(() => {
+      this.update();
+    }, 20);
+  }
 
-    const table = new Table(0, 0, screenWidth, screenHeight);
-    table.background = "black";
+  movePaddle(id: number, y: number): void {
+    switch (id) {
+      case 0:
+        this.player1.y = y;
+        break;
+      case 1:
+        this.player2.y = y;
+        break;
+      default:
+        console.log(`error: invalid player id: ${id}`);
+        return;
+    }
+    this.fireStateChange(new PaddleChangeEvent([
+      this.player1.y,
+      this.player2.y,
+    ]));
+  }
 
-    const ball = new Ball(250, 100);
-    ball.vx = 4;
-    ball.vy = 2;
+  private fireStateChange(e: ChangeEvent): void {
+    if (this.cb) {
+      const self = this;
+      setTimeout(() => {
+        if (self.cb) self.cb(e);
+      }, 0);
+    }
+  }
 
-    const player1 = new Paddle(30, 250);
-    player1.vy = 4;
+  private update() {
+    const table = this.table;
+    const ball = this.ball;
+    const player1 = this.player1;
+    const player2 = this.player2;
 
-    const player2 = new Paddle(table.width - 50, 250);
-    player2.vy = 4;
-
-    table.add(ball, player1, player2);
-
-    if (ball.y > screenHeight - 5 || ball.y < 5) {
+    // Ball bounces off the top and bottom sides of the table.
+    if (ball.y > table.height - 5 || ball.y < 5) {
       ball.vy *= -1;
     }
 
-    // when bouncing off paddles reverse direction, increase
-    // x velocity by a constant and y value by a random value
+    // Ball bounces off paddles. The x velocity increases by a
+    // constant and the y velocity increases by a random amount.
     const xFactor = -1.1;
     const yFactor = (Math.random() * 6) - 3;
 
@@ -65,24 +140,9 @@ class PongEngine {
     // Move the ball
     ball.x += ball.vx;
     ball.y += ball.vy;
-  }
 
-  private fireStateChange(state: PongState): void {
-    if (this.cb) {
-      setTimeout(() => {
-        if (this.cb) this.cb(state);
-      }, 0);
-    }
-  }
-}
-
-class PongState {
-  ball: Ball;
-  players: Array<Paddle>;
-
-  constructor() {
-    this.ball = new Ball();
-    this.players = new Array<Paddle>();
+    const e = new BallChangeEvent(ball.x, ball.y, ball.vx, ball.vy);
+    this.fireStateChange(e);
   }
 }
 
@@ -164,11 +224,11 @@ class Sprite {
     this.background = "white";
   }
 
-  update(g: GraphicsContext) {
+  update(g: GraphicsContext): void {
     g.p5.rect(this.x, this.y, this.width, this.height);
   }
 
-  paint(g: GraphicsContext) {
+  paint(g: GraphicsContext): void {
     g.p5.fill(this.background);
     this.update(g);
   }
@@ -183,13 +243,13 @@ class Container extends Sprite {
     this.sprites = new Set<Sprite>();
   }
 
-  add(...sprites: Array<Sprite>) {
+  add(...sprites: Array<Sprite>): void {
     for (const s of sprites) {
       this.sprites.add(s);
     }
   }
 
-  paint(g: GraphicsContext) {
+  paint(g: GraphicsContext): void {
     super.paint(g);
     for (const s of this.sprites) {
       s.paint(g);
@@ -216,19 +276,33 @@ class Ball extends Sprite {
 class Paddle extends Sprite {
   downKey: number = 0;
   upKey: number = 0;
+  cb: ((y: number) => void) | null;
 
   constructor(x = 0, y = 0, width = 20, height = 100) {
     super(x, y, width, height);
+    this.cb = null;
   }
 
-  update(g: GraphicsContext) {
+  update(g: GraphicsContext): void {
     if (g.p5.keyIsDown(this.downKey) && this.y < g.height - this.height - 5) {
-      this.y += this.vy;
+      this.fireChangeEvent(this.y + this.vy);
     }
     if (g.p5.keyIsDown(this.upKey) && this.y > 5) {
-      this.y -= this.vy;
+      this.fireChangeEvent(this.y - this.vy);
     }
     super.update(g);
+  }
+
+  onchange(cb: (y: number) => void): void {
+    this.cb = cb;
+  }
+
+  private fireChangeEvent(y: number): void {
+    if (this.cb) {
+      setTimeout(() => {
+        if (this.cb) this.cb(y);
+      }, 0);
+    }
   }
 }
 
@@ -255,54 +329,50 @@ const sketch = (p5: P5) => {
 
   table.add(ball, player1, player2);
 
+  const events = new Array<ChangeEvent>();
+  const pong = new PongEngine();
+  pong.onStateChange(e => {
+    if (e instanceof PaddleChangeEvent) {
+      events.unshift(e);
+    } else {
+      events.push(e);
+    }
+  });
+  // TODO: need player id assigned from server
+  player1.onchange(y => {
+    pong.movePaddle(0, y);
+  });
+  player2.onchange(y => {
+    pong.movePaddle(1, y);
+  });
+
   p5.setup = () => {
     const canvas = p5.createCanvas(screenWidth, screenHeight);
     canvas.parent("pong");
     p5.frameRate(60);
+    pong.start();
   };
 
   p5.draw = () => {
     const g = new GraphicsContext(p5, 0, 0, screenWidth, screenHeight);
     table.paint(g);
 
-    if (ball.y > screenHeight - 5 || ball.y < 5) {
-      ball.vy *= -1;
+    if (events.length) {
+      const e = events.shift()!;
+      if (e instanceof BallChangeEvent) {
+        console.log(`${e.constructor.name}: e: ${e.x}, y: ${e.y}`);
+        ball.x = e.x;
+        ball.y = e.y;
+      } else if (e instanceof PaddleChangeEvent) {
+        console.log(`${e.constructor.name}: #1 y: ${e.y}, #2 y: ${e.y}`);
+        player1.y = e.y[0];
+        player2.y = e.y[1];
+      } else {
+        console.log(`error: unrecognized event type: ${e!.type}`);
+      }
     }
-
-    // when bouncing off paddles reverse direction, increase
-    // x velocity by a constant and y value by a random value
-    const xFactor = -1.1;
-    const yFactor = (Math.random() * 6) - 3;
-
-    let reverse = false;
-    // if ball bounces off player 1 paddle
-    if (
-      ball.x < player1.x + player1.width + 10 &&
-      ball.y > player1.y &&
-      ball.y < player1.y + player1.height
-    ) {
-      reverse = true;
-    }
-
-    // if ball bounces off player 2 paddle
-    if (
-      ball.x > player2.x - 10 &&
-      ball.y > player2.y &&
-      ball.y < player2.y + player2.height
-    ) {
-      reverse = true;
-    }
-
-    if (reverse) {
-      ball.vx *= xFactor;
-      ball.vy = yFactor;
-    }
-
-    // Move the ball
-    ball.x += ball.vx;
-    ball.y += ball.vy;
   };
 };
 
-(new Pong()).connect();
+// (new Pong()).connect();
 new P5(sketch);
