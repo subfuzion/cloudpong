@@ -1,36 +1,7 @@
 import P5 from "p5";
+import {BallChangeEvent, PongEvent, PaddleChangeEvent} from "../lib/pong/client";
 
-class ChangeEvent {
-  get type(): string {
-    return this.constructor.name;
-  }
-}
-
-class BallChangeEvent extends ChangeEvent {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-
-  constructor(x: number, y: number, vx: number, vy: number) {
-    super();
-    this.x = x;
-    this.y = y;
-    this.vx = vx;
-    this.vy = vy;
-  }
-}
-
-class PaddleChangeEvent extends ChangeEvent {
-  y: Array<number>;
-
-  constructor(y: Array<number>) {
-    super();
-    this.y = y;
-  }
-}
-
-class PongEngine {
+export class PongEngine {
   screenWidth: number;
   screenHeight: number;
   table: Table;
@@ -38,7 +9,7 @@ class PongEngine {
   player1: Paddle;
   player2: Paddle;
 
-  cb: ((e: ChangeEvent) => void) | null = null;
+  cb: ((e: PongEvent) => void) | null = null;
 
   constructor() {
     this.screenWidth = 600;
@@ -60,7 +31,7 @@ class PongEngine {
     this.table.add(this.ball, this.player1, this.player2);
   }
 
-  onStateChange(cb: (e: ChangeEvent) => void): void {
+  onStateChange(cb: (e: PongEvent) => void): void {
     this.cb = cb;
   }
 
@@ -88,7 +59,7 @@ class PongEngine {
     ]));
   }
 
-  private fireStateChange(e: ChangeEvent): void {
+  private fireStateChange(e: PongEvent): void {
     if (this.cb) {
       const self = this;
       setTimeout(() => {
@@ -146,51 +117,9 @@ class PongEngine {
   }
 }
 
-class Pong {
-  id: HTMLElement | null;
-  rss: HTMLElement | null;
-  heapTotal: HTMLElement | null;
-  heapUsed: HTMLElement | null;
-  external: HTMLElement | null;
-
-  ws: WebSocket;
-
-  constructor() {
-    this.id = document.getElementById("id");
-    this.rss = document.getElementById("rss");
-    this.heapTotal = document.getElementById("heapTotal");
-    this.heapUsed = document.getElementById("heapUsed");
-    this.external = document.getElementById("external");
-    if (!(this.id && this.rss && this.heapTotal && this.heapUsed && this.external)) {
-      throw new Error("error getting stats elements");
-    }
-    this.ws = this.connect();
-  }
-
-  connect(): WebSocket {
-    const ws = new WebSocket(`ws://${location.host}`);
-    ws.onmessage = this.onmessage.bind(this);
-    return ws;
-  }
-
-  onmessage(event: MessageEvent<any>): void {
-    const {id, stats} = JSON.parse(event.data);
-    // @ts-ignore
-    this.id.textContent = id;
-    // @ts-ignore
-    this.rss.textContent = stats.rss;
-    // @ts-ignore
-    this.heapTotal.textContent = stats.heapTotal;
-    // @ts-ignore
-    this.heapUsed.textContent = stats.heapUsed;
-    // @ts-ignore
-    this.external.textContent = stats.external;
-  }
-}
-
 // Super simple logic-less graphics library (game logic is on the server).
 
-class GraphicsContext {
+export class GraphicsContext {
   p5: P5;
   x: number;
   y: number;
@@ -207,7 +136,7 @@ class GraphicsContext {
 }
 
 // A sprite is something that knows how to draw itself.
-class Sprite {
+export class Sprite {
   x: number;
   y: number;
   width: number;
@@ -235,7 +164,7 @@ class Sprite {
 }
 
 // A container is a sprite that contains other sprites within its boundaries.
-class Container extends Sprite {
+export class Container extends Sprite {
   sprites: Set<Sprite>;
 
   constructor(x = 0, y = 0, width = 0, height = 0) {
@@ -257,13 +186,13 @@ class Container extends Sprite {
   }
 }
 
-class Table extends Container {
+export class Table extends Container {
   constructor(x = 0, y = 0, width = 600, height = 370) {
     super(x, y, width, height);
   }
 }
 
-class Ball extends Sprite {
+export class Ball extends Sprite {
   constructor(x = 0, y = 0, width = 10, height = 10) {
     super(x, y, width, height);
   }
@@ -273,7 +202,7 @@ class Ball extends Sprite {
   }
 }
 
-class Paddle extends Sprite {
+export class Paddle extends Sprite {
   downKey: number = 0;
   upKey: number = 0;
   cb: ((y: number) => void) | null;
@@ -305,74 +234,3 @@ class Paddle extends Sprite {
     }
   }
 }
-
-const sketch = (p5: P5) => {
-  const screenWidth = 600;
-  const screenHeight = 370;
-
-  const table = new Table(0, 0, screenWidth, screenHeight);
-  table.background = "black";
-
-  const ball = new Ball(250, 100);
-  ball.vx = 4;
-  ball.vy = 2;
-
-  const player1 = new Paddle(30, 250);
-  player1.vy = 4;
-  player1.downKey = 90;  // down: 'z'
-  player1.upKey = 65;    // up:   'a'
-
-  const player2 = new Paddle(table.width - 50, 250);
-  player2.vy = 4;
-  player2.downKey = p5.DOWN_ARROW;
-  player2.upKey = p5.UP_ARROW;
-
-  table.add(ball, player1, player2);
-
-  const events = new Array<ChangeEvent>();
-  const pong = new PongEngine();
-  pong.onStateChange(e => {
-    if (e instanceof PaddleChangeEvent) {
-      events.unshift(e);
-    } else {
-      events.push(e);
-    }
-  });
-  // TODO: need player id assigned from server
-  player1.onchange(y => {
-    pong.movePaddle(0, y);
-  });
-  player2.onchange(y => {
-    pong.movePaddle(1, y);
-  });
-
-  p5.setup = () => {
-    const canvas = p5.createCanvas(screenWidth, screenHeight);
-    canvas.parent("pong");
-    p5.frameRate(60);
-    pong.start();
-  };
-
-  p5.draw = () => {
-    const g = new GraphicsContext(p5, 0, 0, screenWidth, screenHeight);
-    table.paint(g);
-
-    if (events.length) {
-      const e = events.shift()!;
-      if (e instanceof BallChangeEvent) {
-        console.log(`${e.constructor.name}: e: ${e.x}, y: ${e.y}`);
-        ball.x = e.x;
-        ball.y = e.y;
-      } else if (e instanceof PaddleChangeEvent) {
-        console.log(`${e.constructor.name}: #1 y: ${e.y}, #2 y: ${e.y}`);
-        player1.y = e.y[0];
-        player2.y = e.y[1];
-      } else {
-        console.log(`error: unrecognized event type: ${e!.type}`);
-      }
-    }
-  };
-};
-
-// (new Pong()).connect();
-new P5(sketch);

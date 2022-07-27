@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default {
-  mode: "development", entry: "./src/client/pong.ts", devtool: "inline-source-map", module: {
+  mode: "development", entry: "./src/client/app.ts", devtool: "inline-source-map", module: {
     rules: [{
       test: /\.tsx?$/, use: "ts-loader", exclude: /node_modules/,
     }]
