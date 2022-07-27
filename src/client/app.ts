@@ -6,7 +6,14 @@ import {
   PongEngine,
   Table
 } from "./pong";
-import {BallChangeEvent, PongEvent, PaddleChangeEvent, PongClient, StatsEvent} from "../lib/pong/client";
+import {
+  BallUpdate,
+  Message,
+  PaddleUpdate,
+  PongClient,
+  StatsUpdate,
+  PongEvent,
+} from "../lib/pong/client";
 
 class Pong {
   id: HTMLElement | null;
@@ -44,13 +51,15 @@ class Pong {
   //   this.heapUsed!.textContent = stats.heapUsed;
   //   this.external!.textContent = stats.external;
   // }
-  private onmessage(e: PongEvent): void {
-    if (e instanceof StatsEvent) {
-      this.id!.textContent = e.id;
-      this.rss!.textContent = e.rss;
-      this.heapTotal!.textContent = e.heapTotal;
-      this.heapUsed!.textContent = e.heapUsed;
-      this.external!.textContent = e.external;
+  //private onmessage(e: PongEvent): void {
+  private onmessage(e: PongEvent<Message>): void {
+    if (e.message instanceof StatsUpdate) {
+      const m = e.message as StatsUpdate;
+      this.id!.textContent = m.id;
+      this.rss!.textContent = m.stats.rss;
+      this.heapTotal!.textContent = m.stats.heapTotal;
+      this.heapUsed!.textContent = m.stats.heapUsed;
+      this.external!.textContent = m.stats.external;
     }
   }
 }
@@ -78,10 +87,10 @@ export const sketch = (p5: P5) => {
 
   table.add(ball, player1, player2);
 
-  const events = new Array<PongEvent>();
+  const events = new Array<Message>();
   const pong = new PongEngine();
   pong.onStateChange(e => {
-    if (e instanceof PaddleChangeEvent) {
+    if (e instanceof PaddleUpdate) {
       events.unshift(e);
     } else {
       events.push(e);
@@ -108,11 +117,11 @@ export const sketch = (p5: P5) => {
 
     if (events.length) {
       const e = events.shift()!;
-      if (e instanceof BallChangeEvent) {
+      if (e instanceof BallUpdate) {
         console.log(`${e.constructor.name}: e: ${e.x}, y: ${e.y}`);
         ball.x = e.x;
         ball.y = e.y;
-      } else if (e instanceof PaddleChangeEvent) {
+      } else if (e instanceof PaddleUpdate) {
         console.log(`${e.constructor.name}: #1 y: ${e.y}, #2 y: ${e.y}`);
         player1.y = e.y[0];
         player2.y = e.y[1];

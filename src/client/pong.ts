@@ -1,5 +1,5 @@
 import P5 from "p5";
-import {BallChangeEvent, PongEvent, PaddleChangeEvent} from "../lib/pong/client";
+import {BallUpdate, Message, PaddleUpdate} from "../lib/pong/client";
 
 export class PongEngine {
   screenWidth: number;
@@ -9,7 +9,7 @@ export class PongEngine {
   player1: Paddle;
   player2: Paddle;
 
-  cb: ((e: PongEvent) => void) | null = null;
+  cb: ((e: Message) => void) | null = null;
 
   constructor() {
     this.screenWidth = 600;
@@ -31,7 +31,7 @@ export class PongEngine {
     this.table.add(this.ball, this.player1, this.player2);
   }
 
-  onStateChange(cb: (e: PongEvent) => void): void {
+  onStateChange(cb: (e: Message) => void): void {
     this.cb = cb;
   }
 
@@ -53,13 +53,13 @@ export class PongEngine {
         console.log(`error: invalid player id: ${id}`);
         return;
     }
-    this.fireStateChange(new PaddleChangeEvent([
+    this.fireStateChange(new PaddleUpdate([
       this.player1.y,
       this.player2.y,
     ]));
   }
 
-  private fireStateChange(e: PongEvent): void {
+  private fireStateChange(e: Message): void {
     if (this.cb) {
       const self = this;
       setTimeout(() => {
@@ -112,7 +112,7 @@ export class PongEngine {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    const e = new BallChangeEvent(ball.x, ball.y, ball.vx, ball.vy);
+    const e = new BallUpdate(ball.x, ball.y, ball.vx, ball.vy);
     this.fireStateChange(e);
   }
 }

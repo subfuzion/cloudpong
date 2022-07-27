@@ -1,31 +1,31 @@
 export class PongClient {
   ws: WebSocket;
-  cb: ((e: PongEvent) => void) | null;
+  cb: ((e: PongEvent<Message>) => void) | null;
 
-  constructor(url: string, cb: (((e: PongEvent) => void) | null) = null) {
+  constructor(url: string, cb: (((e: PongEvent<Message>) => void) | null) = null) {
     this.cb = cb;
     const ws = this.ws = new WebSocket(url);
     ws.onmessage = this.handleMessage.bind(this);
-
-    ws.onmessage = (e: MessageEvent<any>)
-
     ws.onerror = this.handleError.bind(this);
   }
 
-  set onchange(cb: (e: PongEvent) => void) {
+  set onchange(cb: (e: PongEvent<Message>) => void) {
     this.cb = cb;
   }
 
-  private handleMessage(e: MessageEvent<any>) {
-    this.emitChangeEvent(new StatsEvent(JSON.parse(e.data)));
+  private handleMessage(m: MessageEvent<any>) {
+    // TODO: fix hack (hardcoded to stats)
+    const data = new StatsUpdate(JSON.parse(m.data));
+    const e = new PongEvent<StatsUpdate>(data);
+    this.emitChangeEvent(e);
   }
 
   private handleError(e: Event) {
-    // TODO: fix hack (hardcoded to stats)
-    this.emitChangeEvent(new PongErrorEvent(e.type));
+    const data = new WebSocketError(e.type);
+    this.emitChangeEvent(new PongEvent<WebSocketError>(data));
   }
 
-  private emitChangeEvent(e: PongEvent): void {
+  private emitChangeEvent(e: PongEvent<Message>): void {
     if (this.cb) {
       setTimeout(() => {
         if (this.cb) this.cb(e);
@@ -34,13 +34,22 @@ export class PongClient {
   }
 }
 
-export class PongEvent {
-  get type(): string {
+
+export class PongEvent<T extends Message> {
+  message: T;
+
+  constructor(message: T) {
+    this.message = message;
+  }
+}
+
+export class Message {
+  type(): string {
     return this.constructor.name;
   }
 }
 
-export class PongErrorEvent extends PongEvent {
+export class WebSocketError extends Message {
   message: string;
 
   constructor(message: string) {
@@ -49,7 +58,7 @@ export class PongErrorEvent extends PongEvent {
   }
 }
 
-export class BallChangeEvent extends PongEvent {
+export class BallUpdate extends Message {
   x: number;
   y: number;
   vx: number;
@@ -64,7 +73,7 @@ export class BallChangeEvent extends PongEvent {
   }
 }
 
-export class PaddleChangeEvent extends PongEvent {
+export class PaddleUpdate extends Message {
   y: Array<number>;
 
   constructor(y: Array<number>) {
@@ -73,20 +82,24 @@ export class PaddleChangeEvent extends PongEvent {
   }
 }
 
-export class StatsEvent extends PongEvent {
+export class StatsUpdate extends Message {
   id: string;
-  rss: string;
-  heapTotal: string;
-  heapUsed: string;
-  external: string;
+  stats: {
+    rss: string;
+    heapTotal: string;
+    heapUsed: string;
+    external: string;
+  };
 
   constructor(data: any) {
     super();
     const {id, stats} = data;
     this.id = id;
-    this.rss = stats?.rss;
-    this.heapTotal = stats?.heapTotal;
-    this.heapUsed = stats?.heapUsed;
-    this.external = stats?.external;
+    this.stats = {
+      rss: stats.rss,
+      heapTotal: stats.heapTotal,
+      heapUsed: stats.heapUsed,
+      external: stats.external,
+    };
   }
 }
