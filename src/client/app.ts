@@ -32,27 +32,12 @@ class Pong {
     this.heapUsed = document.getElementById("heapUsed");
     this.external = document.getElementById("external");
 
-    // this.ws = this.connect();
+    // TODO: need to bundle with correct url for deployment
     //this.client = new PongClient(`ws://${location.host}`);
-    this.client = new PongClient(`ws://localhost:8081`);
+    this.client = new PongClient("ws://localhost:8081");
     this.client.onchange = this.onmessage.bind(this);
   }
 
-  // connect(): WebSocket {
-  //   const ws = new WebSocket(`ws://${location.host}`);
-  //   ws.onmessage = this.onmessage.bind(this);
-  //   return ws;
-  // }
-
-  // private onmessage(event: MessageEvent<any>): void {
-  //   const {id, stats} = JSON.parse(event.data);
-  //   this.id!.textContent = id;
-  //   this.rss!.textContent = stats.rss;
-  //   this.heapTotal!.textContent = stats.heapTotal;
-  //   this.heapUsed!.textContent = stats.heapUsed;
-  //   this.external!.textContent = stats.external;
-  // }
-  //private onmessage(e: PongEvent): void {
   private onmessage(e: PongEvent<Message>): void {
     if (e.message instanceof StatsUpdate) {
       const m = e.message as StatsUpdate;
