@@ -33,7 +33,8 @@ class Pong {
     this.external = document.getElementById("external");
 
     // this.ws = this.connect();
-    this.client = new PongClient(`ws://${location.host}`);
+    //this.client = new PongClient(`ws://${location.host}`);
+    this.client = new PongClient(`ws://localhost:8081`);
     this.client.onchange = this.onmessage.bind(this);
   }
 

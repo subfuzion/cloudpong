@@ -4,6 +4,7 @@ export class PongClient {
 
   constructor(url: string, cb: (((e: PongEvent<Message>) => void) | null) = null) {
     this.cb = cb;
+    console.log("connecting to", url);
     const ws = this.ws = new WebSocket(url);
     ws.onmessage = this.handleMessage.bind(this);
     ws.onerror = this.handleError.bind(this);
@@ -21,6 +22,7 @@ export class PongClient {
   }
 
   private handleError(e: Event) {
+    console.log(e);
     const data = new WebSocketError(e.type);
     this.emitChangeEvent(new PongEvent<WebSocketError>(data));
   }
@@ -33,7 +35,6 @@ export class PongClient {
     }
   }
 }
-
 
 export class PongEvent<T extends Message> {
   message: T;
@@ -103,3 +104,4 @@ export class StatsUpdate extends Message {
     };
   }
 }
+
