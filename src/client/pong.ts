@@ -1,5 +1,6 @@
 import P5 from "p5";
-import {BallUpdate, Message, PaddleUpdate} from "../lib/pong/client";
+import {BallUpdate, Message, PaddleUpdate} from "../common/pong/messages";
+
 
 export class PongEngine {
   screenWidth: number;
@@ -117,6 +118,7 @@ export class PongEngine {
   }
 }
 
+
 // Super simple logic-less graphics library (game logic is on the server).
 
 export class GraphicsContext {
@@ -134,6 +136,7 @@ export class GraphicsContext {
     this.height = height;
   }
 }
+
 
 // A sprite is something that knows how to draw itself.
 export class Sprite {
@@ -163,6 +166,7 @@ export class Sprite {
   }
 }
 
+
 // A container is a sprite that contains other sprites within its boundaries.
 export class Container extends Sprite {
   sprites: Set<Sprite>;
@@ -186,11 +190,13 @@ export class Container extends Sprite {
   }
 }
 
+
 export class Table extends Container {
   constructor(x = 0, y = 0, width = 600, height = 370) {
     super(x, y, width, height);
   }
 }
+
 
 export class Ball extends Sprite {
   constructor(x = 0, y = 0, width = 10, height = 10) {
@@ -201,6 +207,7 @@ export class Ball extends Sprite {
     g.p5.ellipse(this.x, this.y, this.width, this.height);
   }
 }
+
 
 export class Paddle extends Sprite {
   downKey: number = 0;

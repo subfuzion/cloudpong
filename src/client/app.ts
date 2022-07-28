@@ -1,10 +1,17 @@
 import P5, {Element} from "p5";
 import {Ball, GraphicsContext, Paddle, PongEngine, Table} from "./pong";
-import {BallUpdate, Message, PaddleUpdate, PongClient, PongEvent, StatsUpdate,} from "../lib/pong/client";
+import {PongClient, PongEvent,} from "../common/pong/client";
+import {
+  BallUpdate,
+  Message,
+  PaddleUpdate,
+  StatsUpdate
+} from "../common/pong/messages";
 
 // TODO: need to bundle with correct url for deployment
 // const HOST = `ws://${location.host}`;
 const HOST = "ws://localhost:8081";
+
 
 /**
  * A very rudimentary wrapper around P5.js to simplify implementing Pong for
@@ -59,6 +66,7 @@ class P5JS {
   draw(): void {
   }
 }
+
 
 class Pong extends P5JS {
   // stats dom elements
@@ -193,6 +201,7 @@ class Pong extends P5JS {
     }
   }
 }
+
 
 // "pong" is the DOM element that will be used for the P5 canvas.
 P5JS.create(Pong, "pong", 600, 370);

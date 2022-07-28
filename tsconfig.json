@@ -120,7 +120,7 @@
     /* Skip type checking all .d.ts files. */
   },
   "include": [
-    "./src/lib/**/*",
+    "./src/common/**/*",
     "./src/server/**/*"
   ],
   "watchOptions": {
