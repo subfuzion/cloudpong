@@ -11,7 +11,8 @@ import {P5js} from "./lib/p5js";
 import {PongEngine} from "../common/pong/engine";
 import {GraphicsContext} from "./lib/gfx";
 
-// TODO: need to bundle with correct url for deployment
+// TODO: Use "wss://" instead of "ws://" for production.
+// TODO: Need to bundle with correct url for deployment.
 // const HOST = `ws://${location.host}`;
 const HOST = "ws://localhost:8081";
 
@@ -37,9 +38,10 @@ class Pong extends P5js {
 
   constructor(
       p5: P5,
-      parent: (string | Element | object) = "pong",
+      parent: string | Element | object,
       width: number,
-      height: number) {
+      height: number,
+      host: string) {
     super(p5, parent, width, height);
 
     this.id = document.getElementById("id");
@@ -48,7 +50,7 @@ class Pong extends P5js {
     this.heapUsed = document.getElementById("heapUsed");
     this.external = document.getElementById("external");
 
-    this.client = new PongClient(HOST);
+    this.client = new PongClient(host);
     this.client.onchange = this.onmessage.bind(this);
 
     // game objects
@@ -152,4 +154,4 @@ class Pong extends P5js {
 
 
 // "pong" is the DOM element that will be used for the p5 canvas.
-P5js.create(Pong, "pong", 600, 370);
+P5js.create(Pong, "pong", 600, 370, HOST);

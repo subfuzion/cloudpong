@@ -30,6 +30,7 @@ export class P5js {
    * @param parent The DOM element to use for drawing.
    * @param width The width of the P5 canvas.
    * @param height The height of the P5 canvas.
+   * @param host The WebSocket server address (ws://example.com).
    * @param cb Use the callback if you want a reference to the new object.
    */
   static create<T extends P5js>(
@@ -37,6 +38,7 @@ export class P5js {
       parent: string | Element | object,
       width: number,
       height: number,
+      host: string,
       cb?: (instance: T) => void) {
     new P5((p5: P5) => {
       const instance = new type(p5, parent, width, height);

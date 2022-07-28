@@ -1,4 +1,8 @@
-import {Message, StatsUpdate, WebSocketError} from "./messages";
+import {
+  Message,
+  StatsUpdate,
+  WebSocketError
+} from "./messages";
 
 
 export class PongEvent<T extends Message> {

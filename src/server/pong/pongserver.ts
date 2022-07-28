@@ -3,6 +3,7 @@ import {WebSocketServer} from "ws";
 import {Connections} from "./connections.js";
 import {Client} from "./client";
 
+
 export class PongServer {
   readonly server: http.Server;
   readonly wss: WebSocketServer;
@@ -38,9 +39,11 @@ export class PongServer {
       console.log("websocket server connection");
       this.connections.add(ws);
       if (this.connections.size) {
-        // Start an interval for the first client; broadcast stats every 100 ms for all
-        // connected clients.
-        this.connections.startBroadcasting(this.stats.bind(this), this.intervalMs);
+        // Start an interval for the first client; broadcast stats every 100 ms
+        // for all connected clients.
+        this.connections.startBroadcasting(
+            this.stats.bind(this),
+            this.intervalMs);
       }
     });
   }
@@ -55,7 +58,7 @@ export class PongServer {
   // (avoids using JSON.stringify inside a loop).
   // broadcast() can be invoked with different generators.
   * stats(): Generator<[Client, string]> {
-    // Get stats outside of the loop and stringify early.
+    // Get stats outside the loop and stringify early.
     const stats = JSON.stringify(process.memoryUsage());
     const statsPostfix = "\", \"stats\": " + stats + "}";
     for (const client of this.connections.values()) {
