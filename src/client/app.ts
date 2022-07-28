@@ -7,7 +7,7 @@ import {
   PaddleUpdate,
   StatsUpdate
 } from "../common/pong/messages";
-import {P5JS} from "./lib/p5js";
+import {P5js} from "./lib/p5js";
 import {PongEngine} from "../common/pong/engine";
 import {GraphicsContext} from "./lib/gfx";
 
@@ -16,7 +16,7 @@ import {GraphicsContext} from "./lib/gfx";
 const HOST = "ws://localhost:8081";
 
 
-class Pong extends P5JS {
+class Pong extends P5js {
   // stats dom elements
   id: HTMLElement | null;
   rss: HTMLElement | null;
@@ -151,5 +151,5 @@ class Pong extends P5JS {
 }
 
 
-// "pong" is the DOM element that will be used for the P5 canvas.
-P5JS.create(Pong, "pong", 600, 370);
+// "pong" is the DOM element that will be used for the p5 canvas.
+P5js.create(Pong, "pong", 600, 370);
