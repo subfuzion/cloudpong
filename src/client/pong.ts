@@ -1,7 +1,7 @@
-import {Container, GraphicsContext, Sprite} from "./lib/gfx";
+import {View, GraphicsContext, Sprite} from "./lib/gfx";
 
 
-export class Table extends Container {
+export class Table extends View {
   constructor(x = 0, y = 0, width = 600, height = 370) {
     super(x, y, width, height);
   }

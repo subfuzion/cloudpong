@@ -47,8 +47,8 @@ export class Sprite {
 }
 
 
-// A container is a sprite that contains other sprites within its boundaries.
-export class Container extends Sprite {
+// A view is a sprite that contains other sprites.
+export class View extends Sprite {
   sprites: Set<Sprite>;
 
   constructor(x = 0, y = 0, width = 0, height = 0) {
