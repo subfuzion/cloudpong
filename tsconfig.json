@@ -126,6 +126,11 @@
     "watchDirectory": "useFsEvents",
     "fallbackPolling": "dynamicPriority",
     // "synchronousWatchDirectory": true,
-    "excludeDirectories": ["**/node_modules", "dist", "src/client"],
+    "excludeDirectories": [
+      ".git",
+      "**/node_modules",
+      "dist",
+      "src/client"
+    ]
   }
 }
