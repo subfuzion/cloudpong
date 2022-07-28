@@ -54,11 +54,9 @@ class P5JS {
   }
 
   setup(): void {
-    const p5 = this.p5;
   }
 
   draw(): void {
-    const p5 = this.p5;
   }
 }
 
@@ -143,7 +141,7 @@ class Pong extends P5JS {
     this.events = events;
   }
 
-  setup() {
+  override setup() {
     super.setup();
     const canvas = this.p5.createCanvas(this.width, this.height);
     try {
@@ -155,7 +153,7 @@ class Pong extends P5JS {
     this.pongEngine.start();
   }
 
-  draw() {
+  override draw() {
     super.draw();
     const width = this.width;
     const height = this.height;
