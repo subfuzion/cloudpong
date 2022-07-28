@@ -125,7 +125,6 @@
     "watchFile": "useFsEvents",
     "watchDirectory": "useFsEvents",
     "fallbackPolling": "dynamicPriority",
-    // "synchronousWatchDirectory": true,
     "excludeDirectories": [
       ".git",
       "**/node_modules",
