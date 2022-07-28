@@ -41,7 +41,7 @@ export class P5js {
       host: string,
       cb?: (instance: T) => void) {
     new P5((p5: P5) => {
-      const instance = new type(p5, parent, width, height);
+      const instance = new type(p5, parent, width, height, host);
       if (cb) {
         setTimeout(() => {
           cb(instance);
