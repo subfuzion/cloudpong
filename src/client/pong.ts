@@ -54,9 +54,9 @@ export class PongEngine {
         return;
     }
     this.fireStateChange(new PaddleUpdate([
-      this.player1.y,
-      this.player2.y,
-    ]));
+                                            this.player1.y,
+                                            this.player2.y,
+                                          ]));
   }
 
   private fireStateChange(e: Message): void {
@@ -87,18 +87,18 @@ export class PongEngine {
     let reverse = false;
     // if ball bounces off player 1 paddle
     if (
-      ball.x < player1.x + player1.width + 10 &&
-      ball.y > player1.y &&
-      ball.y < player1.y + player1.height
+        ball.x < player1.x + player1.width + 10 &&
+        ball.y > player1.y &&
+        ball.y < player1.y + player1.height
     ) {
       reverse = true;
     }
 
     // if ball bounces off player 2 paddle
     if (
-      ball.x > player2.x - 10 &&
-      ball.y > player2.y &&
-      ball.y < player2.y + player2.height
+        ball.x > player2.x - 10 &&
+        ball.y > player2.y &&
+        ball.y < player2.y + player2.height
     ) {
       reverse = true;
     }
@@ -178,7 +178,7 @@ export class Container extends Sprite {
     }
   }
 
-  paint(g: GraphicsContext): void {
+  override paint(g: GraphicsContext): void {
     super.paint(g);
     for (const s of this.sprites) {
       s.paint(g);
@@ -197,7 +197,7 @@ export class Ball extends Sprite {
     super(x, y, width, height);
   }
 
-  update(g: GraphicsContext) {
+  override update(g: GraphicsContext) {
     g.p5.ellipse(this.x, this.y, this.width, this.height);
   }
 }
@@ -212,7 +212,7 @@ export class Paddle extends Sprite {
     this.cb = null;
   }
 
-  update(g: GraphicsContext): void {
+  override update(g: GraphicsContext): void {
     if (g.p5.keyIsDown(this.downKey) && this.y < g.height - this.height - 5) {
       this.fireChangeEvent(this.y + this.vy);
     }
