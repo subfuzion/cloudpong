@@ -14,6 +14,7 @@
     "watch": "chokidar \"src/client/**/*\" \"src/lib\" \"src/server/**/*\" -c \"npm run build\"",
     "old-predev": "npm run build",
     "old-dev": "NODE_ENV=development concurrently \"npm run watch\" \"nodemon -q --trace-warnings dist/server/main.js\"",
+    "predev": "npm run clean",
     "dev": "NODE_ENV=development concurrently 'webpack server' 'npm run dev-server'",
     "prestart": "npm run build",
     "start": "NODE_ENV=production node dist/server/main.js",
