@@ -7,7 +7,7 @@
   "type": "module",
   "scripts": {
     "clean": "rm -rf dist",
-    "webpack-server": "webpack server",
+    "webpack-server": "webpack server --quiet --no-info",
     "tsc": "tsc",
     "dev-server": "PORT=8081 tsc-watch --noClear -p ./tsconfig.json --onSuccess 'node ./dist/server/main.js'",
     "build-all": "tsc && webpack",

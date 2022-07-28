@@ -6,22 +6,33 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default {
-  mode: "development", entry: "./src/client/app.ts", devtool: "inline-source-map", module: {
-    rules: [{
-      test: /\.tsx?$/, use: "ts-loader", exclude: /node_modules/,
-    }]
-  }, resolve: {
-    extensions: [".js", ".ts", ".tsx"]
-  }, output: {
-    filename: "bundle.js", path: path.resolve(__dirname, "dist/server/public"),
-  }, plugins: [new CopyPlugin({
-    patterns: [
+  stats: "minimal",
+  mode: "development",
+  entry: "./src/client/app.ts",
+  devtool: "inline-source-map",
+  module: {
+    rules: [
       {
-        from: "./src/client",
-        globOptions: {
-          ignore: ["**/*.js", "**/*.ts", "**/*.tsx"],
-        }
-      },
-    ],
-  }),]
+        test: /\.tsx?$/, use: "ts-loader", exclude: /node_modules/,
+      }
+    ]
+  },
+  resolve: {
+    extensions: [".js", ".ts", ".tsx"]
+  },
+  output: {
+    filename: "bundle.js", path: path.resolve(__dirname, "dist/server/public"),
+  },
+  plugins: [
+    new CopyPlugin({
+      patterns: [
+        {
+          from: "./src/client",
+          globOptions: {
+            ignore: ["**/*.js", "**/*.ts", "**/*.tsx"],
+          }
+        },
+      ],
+    }),
+  ]
 };
