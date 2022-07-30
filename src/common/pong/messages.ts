@@ -15,28 +15,28 @@ export class WebSocketError extends Message {
 }
 
 
-export class BallUpdate extends Message {
+export class Update extends Message {
   x: number;
   y: number;
   vx: number;
   vy: number;
+  player1y: number;
+  player2y: number;
 
-  constructor(x: number, y: number, vx: number, vy: number) {
+  constructor(
+      x: number,
+      y: number,
+      vx: number,
+      vy: number,
+      player1y: number,
+      player2y: number) {
     super();
     this.x = x;
     this.y = y;
     this.vx = vx;
     this.vy = vy;
-  }
-}
-
-
-export class PaddleUpdate extends Message {
-  y: Array<number>;
-
-  constructor(y: Array<number>) {
-    super();
-    this.y = y;
+    this.player1y = player1y;
+    this.player2y = player2y;
   }
 }
 

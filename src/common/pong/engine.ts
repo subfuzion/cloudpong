@@ -1,5 +1,12 @@
-import {BallUpdate, Message, PaddleUpdate} from "./messages";
-import {Ball, Paddle, Table} from "../../client/pong";
+import {
+  Update,
+  Message,
+} from "./messages";
+import {
+  Ball,
+  Paddle,
+  Table
+} from "../../client/pong";
 
 
 export class PongEngine {
@@ -20,14 +27,16 @@ export class PongEngine {
     this.table.background = "black";
 
     this.ball = new Ball(250, 100);
-    this.ball.vx = 4;
+    this.ball.vx = 12;
     this.ball.vy = 2;
 
     this.player1 = new Paddle(30, 250);
-    this.player1.vy = 4;
+    this.player1.y = (this.table.height - this.player1.height) / 2;
+    this.player1.vy = 12;
 
     this.player2 = new Paddle(this.table.width - 50, 250);
-    this.player2.vy = 4;
+    this.player2.y = (this.table.height - this.player2.height) / 2;
+    this.player2.vy = 12;
 
     this.table.add(this.ball, this.player1, this.player2);
   }
@@ -39,7 +48,7 @@ export class PongEngine {
   start() {
     setInterval(() => {
       this.update();
-    }, 20);
+    }, 1000 / 30);
   }
 
   movePaddle(id: number, y: number): void {
@@ -54,10 +63,6 @@ export class PongEngine {
         console.log(`error: invalid player id: ${id}`);
         return;
     }
-    this.fireStateChange(new PaddleUpdate([
-                                            this.player1.y,
-                                            this.player2.y,
-                                          ]));
   }
 
   private fireStateChange(e: Message): void {
@@ -113,7 +118,13 @@ export class PongEngine {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    const e = new BallUpdate(ball.x, ball.y, ball.vx, ball.vy);
+    const e = new Update(
+        ball.x,
+        ball.y,
+        ball.vx,
+        ball.vy,
+        this.player1.y,
+        this.player2.y);
     this.fireStateChange(e);
   }
 }
