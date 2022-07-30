@@ -14,7 +14,7 @@
     "build": "tsc && webpack",
     "predev": "npm run clean",
     "dev": "NODE_ENV=development concurrently 'webpack server' 'npm run dev-server'",
-    "start": "NODE_ENV=production node --experimental-specifier-resolution=node ./dist/server/main.js",
+    "start": "node --experimental-specifier-resolution=node ./dist/server/main.js",
     "test": "echo 'No tests' && exit 0"
   },
   "dependencies": {
