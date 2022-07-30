@@ -7,16 +7,13 @@
   "type": "module",
   "scripts": {
     "clean": "rm -rf dist",
+    "webpack": "webpack",
     "webpack-server": "webpack server --quiet --no-info",
     "tsc": "tsc",
     "dev-server": "PORT=8081 tsc-watch --noClear -p ./tsconfig.json --onSuccess 'node --experimental-specifier-resolution=node ./dist/server/main.js'",
-    "build-all": "tsc && webpack",
-    "watch": "chokidar \"src/client/**/*\" \"src/lib\" \"src/server/**/*\" -c \"npm run build\"",
-    "old-predev": "npm run build",
-    "old-dev": "NODE_ENV=development concurrently \"npm run watch\" \"nodemon -q --trace-warnings dist/server/main.js\"",
+    "build": "tsc && webpack",
     "predev": "npm run clean",
     "dev": "NODE_ENV=development concurrently 'webpack server' 'npm run dev-server'",
-    "prestart": "npm run build",
     "start": "NODE_ENV=production node dist/server/main.js",
     "test": "echo 'No tests' && exit 0"
   },
