@@ -2,7 +2,7 @@ import {
   View,
   GraphicsContext,
   Sprite
-} from "./lib/gfx";
+} from "./gfx";
 
 
 export class Table extends View {

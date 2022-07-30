@@ -2,6 +2,7 @@ import {EventEmitter} from "events";
 import {WebSocket} from "ws";
 import {Client} from "./client.js";
 
+
 /**
  * Connections maps websockets to clients.
  */
@@ -47,6 +48,10 @@ export class Connections extends EventEmitter {
     this.connections.set(ws, client);
   }
 
+  get(ws: WebSocket): Client | undefined {
+    return this.connections.get(ws);
+  }
+
   delete(ws: WebSocket): void {
     console.log("delete connection");
     this.emit("wsdelete", this.connections.get(ws));
@@ -56,7 +61,7 @@ export class Connections extends EventEmitter {
   }
 
   // Simple broadcast to all clients.
-  broadcast(message: string): void {
+  broadcast(message: any): void {
     for (const client of this.connections.values()) {
       client.send(message, (err) => {
         console.log(err);
@@ -64,8 +69,8 @@ export class Connections extends EventEmitter {
     }
   }
 
-  // Broadcast to all clients with a generator.
-  broadcastg(g: Generator<[Client, string]>): void {
+  // Broadcast to all clients using a generator function.
+  broadcastg(g: Generator<[Client, any]>): void {
     for (const [client, message] of g) {
       client.send(message, err => {
         if (err) console.log(err);
@@ -73,7 +78,9 @@ export class Connections extends EventEmitter {
     }
   }
 
-  startBroadcasting(g: () => Generator<[Client, string]>, intervalMs: number): void {
+  startBroadcasting(
+      g: () => Generator<[Client, any]>,
+      intervalMs: number): void {
     this.intervalId = setInterval(() => {
       this.broadcastg(g());
     }, intervalMs);

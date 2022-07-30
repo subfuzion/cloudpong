@@ -1,7 +1,12 @@
 import * as http from "http";
-import {WebSocketServer} from "ws";
+import {
+  WebSocket,
+  WebSocketServer
+} from "ws";
 import {Connections} from "./connections.js";
 import {Client} from "./client";
+import {PongEngine} from "../../common/pong/engine.js";
+import {Message} from "../../common/pong/messages.js";
 
 
 export class PongServer {
@@ -38,12 +43,13 @@ export class PongServer {
     this.wss.on("connection", ws => {
       console.log("websocket server connection");
       this.connections.add(ws);
-      if (this.connections.size) {
+      if (this.connections.size === 1) {
         // Start an interval for the first client; broadcast stats every 100 ms
         // for all connected clients.
-        this.connections.startBroadcasting(
-            this.stats.bind(this),
-            this.intervalMs);
+        // this.connections.startBroadcasting(
+        //     this.stats.bind(this),
+        //     this.intervalMs);
+        this.startGame(ws);
       }
     });
   }
@@ -66,6 +72,28 @@ export class PongServer {
       const message = "{\"id\": \"" + client.id + statsPostfix;
       yield [client, message];
     }
+  }
+
+  startGame(ws: WebSocket) {
+    const client = this.connections.get(ws);
+    if (!client) {
+      throw new Error(`fatal: unable to get websocket for client`);
+    }
+
+    const game = new PongEngine();
+
+    game.onStateChange((m: Message) => {
+      console.log(m);
+      ws.send(JSON.stringify(m));
+    });
+
+    ws.on("message", data => {
+//      console.log(data);
+      const m = JSON.parse(data.toString());
+      game.movePaddle(m.id, m.y);
+    });
+
+    game.start();
   }
 
 }

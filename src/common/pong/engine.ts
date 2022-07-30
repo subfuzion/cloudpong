@@ -1,12 +1,12 @@
 import {
   Update,
   Message,
-} from "./messages";
+} from "./messages.js";
 import {
   Ball,
   Paddle,
   Table
-} from "../../client/pong";
+} from "./pong.js";
 
 
 export class PongEngine {

@@ -38,6 +38,17 @@ export class Update extends Message {
     this.player1y = player1y;
     this.player2y = player2y;
   }
+
+  static fromJson(data: Buffer): Update {
+    const o = JSON.parse(data.toString());
+    return new Update(
+        o.x,
+        o.y,
+        o.vx,
+        o.vy,
+        o.player1y,
+        o.player2y);
+  }
 }
 
 

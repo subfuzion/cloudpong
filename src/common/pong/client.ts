@@ -1,6 +1,7 @@
 import {
   Message,
   StatsUpdate,
+  Update,
   WebSocketError
 } from "./messages";
 
@@ -32,10 +33,18 @@ export class PongClient {
     this.cb = cb;
   }
 
+  send(message: any) {
+    const m = JSON.stringify(message);
+    this.ws.send(m);
+  }
+
   private handleMessage(m: MessageEvent<any>) {
-    // TODO: fix hack (hardcoded to stats)
-    const data = new StatsUpdate(JSON.parse(m.data));
-    const e = new PongEvent<StatsUpdate>(data);
+    // // TODO: fix hack (hardcoded to StatsUpdate)
+    // const data = new StatsUpdate(JSON.parse(m.data));
+    // const e = new PongEvent<StatsUpdate>(data);
+    // TODO: fix hack (hardcoded to Update)
+    const data = Update.fromJson(m.data);
+    const e = new PongEvent<Update>(data);
     this.emitChangeEvent(e);
   }
 

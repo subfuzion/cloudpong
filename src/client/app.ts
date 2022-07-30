@@ -3,7 +3,7 @@ import {
   Ball,
   Paddle,
   Table
-} from "./pong";
+} from "../common/pong/pong";
 import {
   PongClient,
   PongEvent,
@@ -13,9 +13,9 @@ import {
   Message,
   StatsUpdate
 } from "../common/pong/messages";
-import {P5js} from "./lib/p5js";
-import {PongEngine} from "../common/pong/engine";
-import {GraphicsContext} from "./lib/gfx";
+import {P5js} from "../server/pong/p5js";
+//import {PongEngine} from "../common/pong/engine";
+import {GraphicsContext} from "../common/pong/gfx";
 
 // TODO: Use "wss://" instead of "ws://" for production.
 // TODO: Need to bundle with correct url for deployment.
@@ -39,7 +39,8 @@ class Pong extends P5js {
   ball: Ball;
   player1: Paddle;
   player2: Paddle;
-  pongEngine: PongEngine;
+
+  //pongEngine: PongEngine;
 
   constructor(
       p5: P5,
@@ -74,31 +75,39 @@ class Pong extends P5js {
 
     table.add(ball, player1, player2);
 
-    const pongEngine = new PongEngine();
-    pongEngine.onStateChange(e => {
-      if (e instanceof Update) {
-        this.ball.x = e.x;
-        this.ball.y = e.y;
-        this.ball.vx = e.vx;
-        this.ball.vy = e.vy;
-        this.player1.y = e.player1y;
-        this.player2.y = e.player2y;
-      }
-    });
+    // const pongEngine = new PongEngine();
+    // pongEngine.onStateChange(e => {
+    //   if (e instanceof Update) {
+    //     this.ball.x = e.x;
+    //     this.ball.y = e.y;
+    //     this.ball.vx = e.vx;
+    //     this.ball.vy = e.vy;
+    //     this.player1.y = e.player1y;
+    //     this.player2.y = e.player2y;
+    //   }
+    // });
 
     // TODO: need player id assigned from server
     player1.onchange(y => {
-      pongEngine.movePaddle(0, y);
+      ////pongEngine.movePaddle(0, y);
+      this.client.send({
+        id: 0,
+        y: y
+      });
     });
     player2.onchange(y => {
-      pongEngine.movePaddle(1, y);
+      //pongEngine.movePaddle(1, y);
+      this.client.send({
+        id: 1,
+        y: y
+      });
     });
 
     this.table = table;
     this.ball = ball;
     this.player1 = player1;
     this.player2 = player2;
-    this.pongEngine = pongEngine;
+    // this.pongEngine = pongEngine;
   }
 
   override setup() {
@@ -110,7 +119,7 @@ class Pong extends P5js {
       throw new Error(`canvas.parent(${this.parent}) Is '${this.parent}' the correct element?) ${err}`);
     }
     this.p5.frameRate(60);
-    this.pongEngine.start();
+//    this.pongEngine.start();
   }
 
   override draw() {
@@ -120,13 +129,31 @@ class Pong extends P5js {
   }
 
   private onmessage(e: PongEvent<Message>): void {
-    if (e.message instanceof StatsUpdate) {
-      const m = e.message as StatsUpdate;
-      this.id!.textContent = m.id;
-      this.rss!.textContent = m.stats.rss;
-      this.heapTotal!.textContent = m.stats.heapTotal;
-      this.heapUsed!.textContent = m.stats.heapUsed;
-      this.external!.textContent = m.stats.external;
+    console.log(e);
+    // if (e.message instanceof StatsUpdate) {
+    //   const m = e.message as StatsUpdate;
+    //   this.id!.textContent = m.id;
+    //   this.rss!.textContent = m.stats.rss;
+    //   this.heapTotal!.textContent = m.stats.heapTotal;
+    //   this.heapUsed!.textContent = m.stats.heapUsed;
+    //   this.external!.textContent = m.stats.external;
+    // } else if (e.message instanceof Update) {
+    //   const m = e.message as Update;
+    //   this.ball.x = m.x;
+    //   this.ball.y = m.y;
+    //   this.ball.vx = m.vx;
+    //   this.ball.vy = m.vy;
+    //   this.player1.y = m.player1y;
+    //   this.player2.y = m.player2y;
+    // }
+    if (e.message instanceof Update) {
+      const m = e.message as Update;
+      this.ball.x = m.x;
+      this.ball.y = m.y;
+      this.ball.vx = m.vx;
+      this.ball.vy = m.vy;
+      this.player1.y = m.player1y;
+      this.player2.y = m.player2y;
     }
   }
 }
