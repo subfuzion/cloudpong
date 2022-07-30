@@ -63,18 +63,12 @@ class Pong extends P5js {
     table.background = "black";
 
     const ball = new Ball(250, 100);
-    ball.vx = 4;
-    ball.vy = 2;
 
     const player1 = new Paddle(30, 250);
-    player1.y = (table.height - player1.height) / 2;
-    player1.vy = 4;
     player1.upKey = 65;    // up:   'a'
     player1.downKey = 90;  // down: 'z'
 
     const player2 = new Paddle(table.width - 50, 250);
-    player2.y = (table.height - player2.height) / 2;
-    player2.vy = 4;
     player2.upKey = p5.UP_ARROW;
     player2.downKey = p5.DOWN_ARROW;
 
@@ -115,7 +109,7 @@ class Pong extends P5js {
     } catch (err) {
       throw new Error(`canvas.parent(${this.parent}) Is '${this.parent}' the correct element?) ${err}`);
     }
-    this.p5.frameRate(30);
+    this.p5.frameRate(60);
     this.pongEngine.start();
   }
 

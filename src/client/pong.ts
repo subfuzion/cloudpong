@@ -1,4 +1,8 @@
-import {View, GraphicsContext, Sprite} from "./lib/gfx";
+import {
+  View,
+  GraphicsContext,
+  Sprite
+} from "./lib/gfx";
 
 
 export class Table extends View {
@@ -30,11 +34,12 @@ export class Paddle extends Sprite {
   }
 
   override update(g: GraphicsContext): void {
+    // TODO: handle extended keydown to accelerate paddle?
     if (g.p5.keyIsDown(this.downKey) && this.y < g.height - this.height - 5) {
-      this.fireChangeEvent(this.y + this.vy);
+      this.fireChangeEvent(1);
     }
     if (g.p5.keyIsDown(this.upKey) && this.y > 5) {
-      this.fireChangeEvent(this.y - this.vy);
+      this.fireChangeEvent(-1);
     }
     super.update(g);
   }

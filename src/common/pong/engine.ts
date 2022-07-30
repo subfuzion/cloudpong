@@ -32,11 +32,11 @@ export class PongEngine {
 
     this.player1 = new Paddle(30, 250);
     this.player1.y = (this.table.height - this.player1.height) / 2;
-    this.player1.vy = 12;
+    this.player1.vy = 8;
 
     this.player2 = new Paddle(this.table.width - 50, 250);
     this.player2.y = (this.table.height - this.player2.height) / 2;
-    this.player2.vy = 12;
+    this.player2.vy = 8;
 
     this.table.add(this.ball, this.player1, this.player2);
   }
@@ -54,10 +54,10 @@ export class PongEngine {
   movePaddle(id: number, y: number): void {
     switch (id) {
       case 0:
-        this.player1.y = y;
+        this.player1.y += this.player1.vy * y;
         break;
       case 1:
-        this.player2.y = y;
+        this.player2.y += this.player2.vy * y;
         break;
       default:
         console.log(`error: invalid player id: ${id}`);
@@ -85,11 +85,7 @@ export class PongEngine {
       ball.vy *= -1;
     }
 
-    // Ball bounces off paddles. The x velocity increases by a
-    // constant and the y velocity increases by a random amount.
-    const xFactor = -1.1;
-    const yFactor = (Math.random() * 6) - 3;
-
+    // If ball bounces off a paddle, reverse direction.
     let reverse = false;
     // if ball bounces off player 1 paddle
     if (
@@ -99,7 +95,6 @@ export class PongEngine {
     ) {
       reverse = true;
     }
-
     // if ball bounces off player 2 paddle
     if (
         ball.x > player2.x - 10 &&
@@ -109,9 +104,15 @@ export class PongEngine {
       reverse = true;
     }
 
+    // Each time the ball reverses direction after bouncing
+    // off a paddle, vx increases by a constant and vy
+    // increases by a random amount.
+    // TODO: take into consideration where the ball hits the paddle.
     if (reverse) {
+      const xFactor = -1.1;
+      const yFactor = 1 + (Math.random() * 0.5);
       ball.vx *= xFactor;
-      ball.vy = yFactor;
+      ball.vy *= yFactor;
     }
 
     // Move the ball
