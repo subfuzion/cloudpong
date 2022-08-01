@@ -19,8 +19,10 @@ import {GraphicsContext} from "../common/pong/gfx";
 
 // TODO: Use "wss://" instead of "ws://" for production.
 // TODO: Need to bundle with correct url for deployment.
-// const HOST = `ws://${location.host}`;
-const HOST = "ws://localhost:8081";
+const HOST = `ws://${location.host}`;
+
+
+//const HOST = "ws://localhost:8081";
 
 
 class Pong extends P5js {
