@@ -13,7 +13,7 @@ import {
   Message,
   StatsUpdate
 } from "../common/pong/messages";
-import {P5js} from "../server/pong/p5js";
+import {P5js} from "../common/pong/p5js";
 //import {PongEngine} from "../common/pong/engine";
 import {GraphicsContext} from "../common/pong/gfx";
 
