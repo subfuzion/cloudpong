@@ -17,14 +17,12 @@ import {P5js} from "../common/pong/p5js";
 //import {PongEngine} from "../common/pong/engine";
 import {GraphicsContext} from "../common/pong/gfx";
 
-// NODE_ENV depends on webpack.config.js "mode".
-const HOST = process.env.NODE_ENV ===
-             "development" ? "ws://localhost:8081" :
-             `wss://${location.host}`;
 
-console.log("=============================");
-console.log(process.env);
-console.log("=============================");
+// NODE_ENV depends on webpack.config.js "mode".
+const WS_PROTOCOL = location.protocol === "https:" ? "wss:" : "ws:";
+const WS_HOST = process.env.NODE_ENV ===
+                "development" ? `${WS_PROTOCOL}//localhost:8081` :
+                `${WS_PROTOCOL}//${location.host}`;
 
 
 class Pong extends P5js {
@@ -78,18 +76,6 @@ class Pong extends P5js {
     player2.downKey = p5.DOWN_ARROW;
 
     table.add(ball, player1, player2);
-
-    // const pongEngine = new PongEngine();
-    // pongEngine.onStateChange(e => {
-    //   if (e instanceof Update) {
-    //     this.ball.x = e.x;
-    //     this.ball.y = e.y;
-    //     this.ball.vx = e.vx;
-    //     this.ball.vy = e.vy;
-    //     this.player1.y = e.player1y;
-    //     this.player2.y = e.player2y;
-    //   }
-    // });
 
     // TODO: need player id assigned from server
     player1.onchange(y => {
@@ -164,4 +150,4 @@ class Pong extends P5js {
 
 
 // "pong" is the DOM element that will be used for the p5 canvas.
-P5js.create(Pong, "pong", 600, 370, HOST);
+P5js.create(Pong, "pong", 600, 370, WS_HOST);

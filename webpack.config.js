@@ -7,6 +7,8 @@ import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+//webpack.compiler.hooks.beforeCompile;
+
 export default env => {
   const mode = env.mode === "development" ? "development" : "production";
 

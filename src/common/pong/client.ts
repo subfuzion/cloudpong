@@ -24,6 +24,7 @@ export class PongClient {
       cb: (((e: PongEvent<Message>) => void) | null) = null) {
     this.cb = cb;
     console.log("connecting to", url);
+
     const ws = this.ws = new WebSocket(url);
     ws.onmessage = this.handleMessage.bind(this);
     ws.onerror = this.handleError.bind(this);
