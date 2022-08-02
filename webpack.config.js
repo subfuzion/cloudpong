@@ -1,38 +1,56 @@
 import * as path from "path";
 import {fileURLToPath} from "url";
 import CopyPlugin from "copy-webpack-plugin";
+import webpack from "webpack";
+import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-export default {
-  stats: "minimal",
-  mode: "development",
-  entry: "./src/client/app.ts",
-  devtool: "inline-source-map",
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/, use: "ts-loader", exclude: /node_modules/,
-      }
-    ]
-  },
-  resolve: {
-    extensions: [".js", ".ts", ".tsx"]
-  },
-  output: {
-    filename: "bundle.js", path: path.resolve(__dirname, "dist/server/public"),
-  },
-  plugins: [
-    new CopyPlugin({
-      patterns: [
+export default env => {
+  const mode = env.mode === "development" ? "development" : "production";
+
+  return {
+    stats: "minimal",
+    mode: mode,
+    entry: "./src/client/app.ts",
+    devtool: "inline-source-map",
+    module: {
+      rules: [
         {
-          from: "./src/client",
-          globOptions: {
-            ignore: ["**/*.js", "**/*.ts", "**/*.tsx"],
-          }
-        },
-      ],
-    }),
-  ]
-};
+          test: /\.tsx?$/, use: "ts-loader", exclude: /node_modules/,
+        }
+      ]
+    },
+    resolve: {
+      extensions: [".js", ".ts", ".tsx"]
+    },
+    output: {
+      filename: "bundle.js",
+      path: path.resolve(__dirname, "dist/server/public"),
+    },
+    plugins: [
+      new CopyPlugin({
+        patterns: [
+          {
+            from: "./src/client", globOptions: {
+              ignore: ["**/*.js", "**/*.ts", "**/*.tsx"],
+            }
+          },
+        ],
+      }),
+      // Defining mode: production | development (above) will automatically set
+      // process.env.NODE_ENV
+      new webpack.DefinePlugin({}),
+      // TODO: find another way to parameterize wss url; this polyfill is
+      //  expensive (bundle size), only here for process.env.NODE_ENV support.
+      new NodePolyfillPlugin(),
+    ],
+    devServer: {
+      client: {
+        webSocketURL: "ws://0.0.0.0:8081",
+      },
+    },
+  };
+}
+

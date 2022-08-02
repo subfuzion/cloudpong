@@ -17,12 +17,14 @@ import {P5js} from "../common/pong/p5js";
 //import {PongEngine} from "../common/pong/engine";
 import {GraphicsContext} from "../common/pong/gfx";
 
-// TODO: Use "wss://" instead of "ws://" for production.
-// TODO: Need to bundle with correct url for deployment.
-const HOST = `wss://${location.host}`;
+// NODE_ENV depends on webpack.config.js "mode".
+const HOST = process.env.NODE_ENV ===
+             "development" ? "ws://localhost:8081" :
+             `wss://${location.host}`;
 
-
-//const HOST = "ws://localhost:8081";
+console.log("=============================");
+console.log(process.env);
+console.log("=============================");
 
 
 class Pong extends P5js {

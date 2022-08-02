@@ -49,8 +49,8 @@ export class PongServer {
         // this.connections.startBroadcasting(
         //     this.stats.bind(this),
         //     this.intervalMs);
-        this.startGame(ws);
       }
+      this.startGame(ws);
     });
   }
 
