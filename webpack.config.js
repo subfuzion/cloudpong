@@ -2,7 +2,6 @@ import * as path from "path";
 import {fileURLToPath} from "url";
 import CopyPlugin from "copy-webpack-plugin";
 import webpack from "webpack";
-import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,10 +43,10 @@ export default env => {
       // Defining mode: production | development (above) will automatically set
       // process.env.NODE_ENV
       new webpack.DefinePlugin({}),
-      // TODO: find another way to parameterize wss url; this polyfill is
-      //  expensive (bundle size), only here for process.env.NODE_ENV support.
-      new NodePolyfillPlugin(),
     ],
+    experiments: {
+      topLevelAwait: true,
+    },
     devServer: {
       client: {
         webSocketURL: "ws://0.0.0.0:8081",

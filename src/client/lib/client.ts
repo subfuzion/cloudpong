@@ -3,7 +3,7 @@ import {
   StatsUpdate,
   Update,
   WebSocketError
-} from "./messages";
+} from "../../common/pong/messages";
 
 
 export class PongEvent<T extends Message> {
@@ -16,18 +16,15 @@ export class PongEvent<T extends Message> {
 
 
 export class PongClient {
-  ws: WebSocket;
+  hosts: Array<string>;
+  ws?: WebSocket;
   cb: ((e: PongEvent<Message>) => void) | null;
 
   constructor(
-      url: string,
+      hosts: Array<string>,
       cb: (((e: PongEvent<Message>) => void) | null) = null) {
+    this.hosts = hosts;
     this.cb = cb;
-    console.log("connecting to", url);
-
-    const ws = this.ws = new WebSocket(url);
-    ws.onmessage = this.handleMessage.bind(this);
-    ws.onerror = this.handleError.bind(this);
   }
 
   set onchange(cb: (e: PongEvent<Message>) => void) {
@@ -36,7 +33,40 @@ export class PongClient {
 
   send(message: any) {
     const m = JSON.stringify(message);
-    this.ws.send(m);
+    this.ws!.send(m);
+  }
+
+  async connect(): Promise<WebSocket> {
+    console.log("connecting to", this.hosts);
+    const self = this;
+    const hosts = this.hosts;
+
+    const _connect = (host: string): Promise<WebSocket> => {
+      return new Promise((resolve, reject) => {
+        try {
+          const ws = new WebSocket(host);
+          ws.addEventListener("open", () => {
+            resolve(ws);
+          });
+        } catch (err) {
+          reject(err);
+        }
+      });
+    };
+
+    // TODO: cleanup for the other ws
+    return new Promise((resolve, reject) => {
+      const connections = hosts.map(host => _connect(host));
+      Promise.any(connections)
+             .then(ws => {
+               console.log(`connected to: ${ws.url}`);
+               ws.onmessage = self.handleMessage.bind(self);
+               ws.onerror = self.handleError.bind(self);
+               self.ws = ws;
+               resolve(ws);
+             })
+             .catch(err => reject(err));
+    });
   }
 
   private handleMessage(m: MessageEvent<any>) {

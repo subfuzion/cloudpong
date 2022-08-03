@@ -7,25 +7,31 @@ import {
 import {
   PongClient,
   PongEvent,
-} from "../common/pong/client";
+} from "./lib/client";
 import {
   Update,
   Message,
   StatsUpdate
 } from "../common/pong/messages";
-import {P5js} from "../common/pong/p5js";
+import {P5App} from "./lib/p5app";
 //import {PongEngine} from "../common/pong/engine";
 import {GraphicsContext} from "../common/pong/gfx";
 
 
-// NODE_ENV depends on webpack.config.js "mode".
+// Support multiple deployment targets: local | local+docker | hosted.
+// Supports webpack devServer (frontend :8080, backend :8081).
 const WS_PROTOCOL = location.protocol === "https:" ? "wss:" : "ws:";
-const WS_HOST = process.env.NODE_ENV ===
-                "development" ? `${WS_PROTOCOL}//localhost:8081` :
-                `${WS_PROTOCOL}//${location.host}`;
+const WS_HOSTS = [
+  `${WS_PROTOCOL}//${location.host}`,
+  `${WS_PROTOCOL}//${location.hostname}:8081`,
+];
+
+process.env.NODE_ENV ===
+"development" ? `${WS_PROTOCOL}//localhost:8081` :
+`${WS_PROTOCOL}//${location.host}`;
 
 
-class Pong extends P5js {
+class PongApp extends P5App {
   // stats dom elements
   id: HTMLElement | null;
   rss: HTMLElement | null;
@@ -42,14 +48,12 @@ class Pong extends P5js {
   player1: Paddle;
   player2: Paddle;
 
-  //pongEngine: PongEngine;
-
   constructor(
       p5: P5,
       parent: string | Element | object,
       width: number,
       height: number,
-      host: string) {
+      hosts: Array<string>) {
     super(p5, parent, width, height);
 
     this.id = document.getElementById("id");
@@ -58,7 +62,8 @@ class Pong extends P5js {
     this.heapUsed = document.getElementById("heapUsed");
     this.external = document.getElementById("external");
 
-    this.client = new PongClient(host);
+    this.client = new PongClient(hosts);
+    this.client.connect();
     this.client.onchange = this.onmessage.bind(this);
 
     // game objects
@@ -97,7 +102,6 @@ class Pong extends P5js {
     this.ball = ball;
     this.player1 = player1;
     this.player2 = player2;
-    // this.pongEngine = pongEngine;
   }
 
   override setup() {
@@ -150,4 +154,4 @@ class Pong extends P5js {
 
 
 // "pong" is the DOM element that will be used for the p5 canvas.
-P5js.create(Pong, "pong", 600, 370, WS_HOST);
+await P5App.create(PongApp, "pong", 600, 370, WS_HOSTS);

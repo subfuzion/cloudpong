@@ -5,7 +5,7 @@ import P5, {Element} from "p5";
  * A very rudimentary wrapper around P5.js to simplify implementing Pong for
  * an ESM / TypeScript environment.
  */
-export class P5js {
+export class P5App {
   readonly p5: P5;
   readonly parent: string | Element | object;
   width: number;
@@ -20,33 +20,37 @@ export class P5js {
     this.parent = parent;
     this.width = width;
     this.height = height;
+
+    // Configure/start p5.js
     p5.setup = this.setup.bind(this);
     p5.draw = this.draw.bind(this);
   }
 
   /**
-   * Creates a new P5JS object of the subclass type, initialized by P5.
-   * @param type The P5JS subclass.
+   * Creates a new P5App object of the subclass type, initialized by P5.
+   * @param type The P5App subclass.
    * @param parent The DOM element to use for drawing.
    * @param width The width of the P5 canvas.
    * @param height The height of the P5 canvas.
-   * @param host The WebSocket server address (ws://example.com).
+   * @param hosts The WebSocket server addresses (wss://example.com).
    * @param cb Use the callback if you want a reference to the new object.
    */
-  static create<T extends P5js>(
+  static async create<T extends P5App>(
       type: { new(...args: any[]): T; },
       parent: string | Element | object,
       width: number,
       height: number,
-      host: string,
-      cb?: (instance: T) => void) {
-    new P5((p5: P5) => {
-      const instance = new type(p5, parent, width, height, host);
-      if (cb) {
-        setTimeout(() => {
-          cb(instance);
-        });
-      }
+      hosts: Array<string>): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      new P5((p5: P5) => {
+        try {
+          const instance = new type(p5, parent, width, height, hosts);
+          //  TODO: start
+          resolve(instance);
+        } catch (err) {
+          reject(err);
+        }
+      });
     });
   }
 
@@ -68,7 +72,7 @@ export class P5js {
    * The setup() function is called once when the program starts. It's used to
    * define initial environment properties such as screen size and background
    * color and to load media such as images and fonts as the program starts.
-   * There can only be one setup() function for each program and it shouldn't
+   * There can only be one setup() function for each program, and it shouldn't
    * be called again after its initial execution. Note: Variables declared
    * within setup() are not accessible within other functions, including
    * draw().
