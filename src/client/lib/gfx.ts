@@ -22,8 +22,17 @@ export class GraphicsContext {
 }
 
 
-// A sprite is something that knows how to draw itself.
-export class Sprite extends Element {
+export interface UIElement extends Element {
+  background: string;
+
+  update(g: GraphicsContext): void;
+
+  paint(g: GraphicsContext): void;
+}
+
+
+// A sprite is something that knows how to render an element on the P5 canvas.
+export class Sprite extends Element implements UIElement {
   background: string;
 
   constructor(x = 0, y = 0, width = 0, height = 0) {
@@ -42,8 +51,8 @@ export class Sprite extends Element {
 }
 
 
-// A view is a sprite that contains other sprites.
-export class View extends Container<Sprite> implements Sprite {
+// A view is a sprite that can also renders child sprites.
+export class View extends Container<Sprite> implements UIElement {
   background: string;
 
   constructor(x = 0, y = 0, width = 0, height = 0) {

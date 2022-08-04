@@ -5,7 +5,7 @@ import {
 } from "ws";
 import {Connections} from "./connections.js";
 import {Client} from "./client";
-import {PongEngine} from "../../common/pong/engine.js";
+import {PongEngine} from "./engine.js";
 import {Message} from "../../common/pong/messages.js";
 
 

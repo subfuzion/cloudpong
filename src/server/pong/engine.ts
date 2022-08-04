@@ -1,12 +1,12 @@
 import {
   Update,
   Message,
-} from "./messages.js";
+} from "../../common/pong/messages.js";
 import {
   Ball,
   Paddle,
   Table
-} from "./elements.js";
+} from "../../common/pong/elements.js";
 
 
 const frameRate = 1000 / 30; // 30 fps
