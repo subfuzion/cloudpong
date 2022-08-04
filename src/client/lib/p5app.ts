@@ -36,7 +36,7 @@ export class P5App {
    * @param cb Use the callback if you want a reference to the new object.
    */
   static async create<T extends P5App>(
-      type: { new(...args: any[]): T; },
+      type: { new(...args: any[]): T },
       parent: string | Element | object,
       width: number,
       height: number,

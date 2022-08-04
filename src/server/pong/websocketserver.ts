@@ -9,7 +9,7 @@ import {PongEngine} from "./engine.js";
 import {Message} from "../../common/pong/messages.js";
 
 
-export class PongServer {
+export class PongWebSocketServer {
   readonly server: http.Server;
   readonly wss: WebSocketServer;
   readonly connections = new Connections();
@@ -54,7 +54,7 @@ export class PongServer {
     });
   }
 
-  close(callback?: (err?: Error) => void): PongServer {
+  close(callback?: (err?: Error) => void): PongWebSocketServer {
     if (callback) this.server.close(callback);
     return this;
   }

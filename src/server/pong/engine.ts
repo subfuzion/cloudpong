@@ -127,13 +127,14 @@ export class PongEngine {
     ball.x += ball.vx;
     ball.y += ball.vy;
 
-    const e = new Update(
-        ball.x,
-        ball.y,
-        ball.vx,
-        ball.vy,
-        this.player1.y,
-        this.player2.y);
+    const e = new Update({
+      x: ball.x,
+      y: ball.y,
+      vx: ball.vx,
+      vy: ball.vy,
+      player1y: this.player1.y,
+      player2y: this.player2.y,
+    });
     this.fireStateChange(e);
   }
 }

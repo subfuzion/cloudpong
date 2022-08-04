@@ -1,7 +1,15 @@
+/**
+ * This is the entrypoint for the server. It starts an Express app
+ * for handling HTTP connections and wraps it with PongWebSocketServer
+ * to handle WebSocket connection upgrades for bi-directional game
+ * traffic.
+ */
+
 import {app} from "./app.js";
 import {AddressInfo} from "net";
 
-import {PongServer} from "./pong/pongserver.js";
+import {PongWebSocketServer} from "./pong/websocketserver.js";
+
 
 const network = "0.0.0.0";
 const port = Number(process.env.PORT) || 8080;
@@ -13,7 +21,7 @@ const server = app.listen(port, network, () => {
 });
 
 // WebSocket server
-const pongServer = new PongServer(server);
+const pongServer = new PongWebSocketServer(server);
 
 async function shutdown(signal: string) {
   if (signal == "SIGINT") console.log();

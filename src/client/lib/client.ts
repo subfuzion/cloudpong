@@ -74,14 +74,15 @@ export class PongClient {
     // const data = new StatsUpdate(JSON.parse(m.data));
     // const e = new PongEvent<StatsUpdate>(data);
     // TODO: fix hack (hardcoded to Update)
-    const data = Update.fromJson(m.data);
+//    const data = Update.fromJson(m.data);
+    const data = Update.parseJSON(Update, m.data.toString());
     const e = new PongEvent<Update>(data);
     this.emitChangeEvent(e);
   }
 
   private handleError(e: Event) {
     console.log(e);
-    const data = new WebSocketError(e.type);
+    const data = new WebSocketError({message: e.type});
     this.emitChangeEvent(new PongEvent<WebSocketError>(data));
   }
 
