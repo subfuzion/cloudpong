@@ -6,7 +6,10 @@ import {
 import {Connections} from "./connections.js";
 import {Client} from "./client";
 import {PongEngine} from "./engine.js";
-import {Message} from "../../common/pong/messages.js";
+import {
+  Message,
+  StatsUpdate
+} from "../../common/pong/messages.js";
 
 
 export class PongWebSocketServer {
@@ -46,9 +49,9 @@ export class PongWebSocketServer {
       if (this.connections.size === 1) {
         // Start an interval for the first client; broadcast stats every 100 ms
         // for all connected clients.
-        // this.connections.startBroadcasting(
-        //     this.stats.bind(this),
-        //     this.intervalMs);
+        this.connections.startBroadcasting(
+            this.stats.bind(this),
+            this.intervalMs);
       }
       this.startGame(ws);
     });
@@ -65,12 +68,18 @@ export class PongWebSocketServer {
   // broadcast() can be invoked with different generators.
   * stats(): Generator<[Client, string]> {
     // Get stats outside the loop and stringify early.
-    const stats = JSON.stringify(process.memoryUsage());
-    const statsPostfix = "\", \"stats\": " + stats + "}";
+    // const stats = JSON.stringify(process.memoryUsage());
+    // const statsPostfix = "\", \"stats\": " + stats + "}";
+    const stats = {
+      cpu: process.cpuUsage(),
+      memory: process.memoryUsage(),
+    };
+    const message = new StatsUpdate({stats: stats});
     for (const client of this.connections.values()) {
       // No stringification, just concatenate in the loop.
-      const message = "{\"id\": \"" + client.id + statsPostfix;
-      yield [client, message];
+      //const message = "{\"id\": \"" + client.id + statsPostfix;
+      message.id = client.id;
+      yield [client, JSON.stringify(message)];
     }
   }
 

@@ -69,15 +69,24 @@ export class PongClient {
     });
   }
 
-  private handleMessage(m: MessageEvent<any>) {
-    // // TODO: fix hack (hardcoded to StatsUpdate)
-    // const data = new StatsUpdate(JSON.parse(m.data));
-    // const e = new PongEvent<StatsUpdate>(data);
-    // TODO: fix hack (hardcoded to Update)
-//    const data = Update.fromJson(m.data);
-    const data = Update.parseJSON(Update, m.data.toString());
-    const e = new PongEvent<Update>(data);
-    this.emitChangeEvent(e);
+  private handleMessage(msg: MessageEvent<any>) {
+    const data = JSON.parse(msg.data.toString());
+    let m: Message;
+    let e: PongEvent<Message>;
+    switch (data.type) {
+      case "Update":
+        m = new Update(data);
+        e = new PongEvent<Update>(m as Update);
+        this.emitChangeEvent(e);
+        break;
+      case "StatsUpdate":
+        m = new StatsUpdate(data);
+        e = new PongEvent<StatsUpdate>(m as StatsUpdate);
+        this.emitChangeEvent(e);
+        break;
+      default:
+        console.log("Error: unrecognized message type: ${data.type}");
+    }
   }
 
   private handleError(e: Event) {

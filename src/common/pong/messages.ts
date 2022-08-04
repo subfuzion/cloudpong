@@ -23,7 +23,7 @@ export class Message {
    * @param s The JSON string.
    */
   static parseJSON<T extends Message>(
-      type: { new(data?: object): T },
+      type: { new(data: object): T },
       s: string): T {
     const j = JSON.parse(s);
     if (!j.type) throw new Error(`No property "type" on ${s}`);
@@ -118,15 +118,27 @@ export class Update extends ServerMessage {
 export class StatsUpdate extends ServerMessage {
   id = "";
   stats: {
-    rss: string;
-    heapTotal: string;
-    heapUsed: string;
-    external: string;
+    cpu: {
+      user: string,
+      system: string,
+    },
+    memory: {
+      rss: string;
+      heapTotal: string;
+      heapUsed: string;
+      external: string;
+    }
   } = {
-    rss: "",
-    heapTotal: "",
-    heapUsed: "",
-    external: "",
+    cpu: {
+      user: "",
+      system: "",
+    },
+    memory: {
+      rss: "",
+      heapTotal: "",
+      heapUsed: "",
+      external: "",
+    }
   };
 
   constructor(data: object) {

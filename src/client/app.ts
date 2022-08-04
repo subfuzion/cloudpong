@@ -33,6 +33,8 @@ process.env.NODE_ENV ===
 
 class PongApp extends P5App {
   // stats dom elements
+  user: HTMLElement | null;
+  system: HTMLElement | null;
   id: HTMLElement | null;
   rss: HTMLElement | null;
   heapTotal: HTMLElement | null;
@@ -56,6 +58,8 @@ class PongApp extends P5App {
       hosts: Array<string>) {
     super(p5, parent, width, height);
 
+    this.user = document.getElementById("user");
+    this.system = document.getElementById("system");
     this.id = document.getElementById("id");
     this.rss = document.getElementById("rss");
     this.heapTotal = document.getElementById("heapTotal");
@@ -124,23 +128,16 @@ class PongApp extends P5App {
 
   private onmessage(e: PongEvent<Message>): void {
     console.log(e);
-    // if (e.message instanceof StatsUpdate) {
-    //   const m = e.message as StatsUpdate;
-    //   this.id!.textContent = m.id;
-    //   this.rss!.textContent = m.stats.rss;
-    //   this.heapTotal!.textContent = m.stats.heapTotal;
-    //   this.heapUsed!.textContent = m.stats.heapUsed;
-    //   this.external!.textContent = m.stats.external;
-    // } else if (e.message instanceof Update) {
-    //   const m = e.message as Update;
-    //   this.ball.x = m.x;
-    //   this.ball.y = m.y;
-    //   this.ball.vx = m.vx;
-    //   this.ball.vy = m.vy;
-    //   this.player1.y = m.player1y;
-    //   this.player2.y = m.player2y;
-    // }
-    if (e.message instanceof Update) {
+    if (e.message instanceof StatsUpdate) {
+      const m = e.message as StatsUpdate;
+      this.user!.textContent = m.stats.cpu.user;
+      this.system!.textContent = m.stats.cpu.system;
+      this.id!.textContent = m.id;
+      this.rss!.textContent = m.stats.memory.rss;
+      this.heapTotal!.textContent = m.stats.memory.heapTotal;
+      this.heapUsed!.textContent = m.stats.memory.heapUsed;
+      this.external!.textContent = m.stats.memory.external;
+    } else if (e.message instanceof Update) {
       const m = e.message as Update;
       this.ball.x = m.x;
       this.ball.y = m.y;
