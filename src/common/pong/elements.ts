@@ -1,6 +1,6 @@
 /**
- * This module provides a common base for game elements that are modeled on both
- * the client and the server.
+ * This module provides a common base for game element state that is modeled on
+ * both the client and the server.
  * - The server game engine operates in "headless" mode while updating and
  *   broadcasting game state to player and spectator clients.
  * - The client is responsible for rendering objects on the game screen and
@@ -9,7 +9,7 @@
 
 
 /**
- * An element represents (and models the physics of) physical game objects.
+ * An element represents physical game object state.
  */
 export class Element {
   x: number;
