@@ -1,4 +1,8 @@
 import P5 from "p5";
+import {
+  Element,
+  Container
+} from "../../common/pong/elements";
 
 
 export class GraphicsContext {
@@ -19,20 +23,11 @@ export class GraphicsContext {
 
 
 // A sprite is something that knows how to draw itself.
-export class Sprite {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  vx = 0;
-  vy = 0;
+export class Sprite extends Element {
   background: string;
 
   constructor(x = 0, y = 0, width = 0, height = 0) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
+    super(x, y, width, height);
     this.background = "white";
   }
 
@@ -48,23 +43,22 @@ export class Sprite {
 
 
 // A view is a sprite that contains other sprites.
-export class View extends Sprite {
-  sprites: Set<Sprite>;
+export class View extends Container<Sprite> implements Sprite {
+  background: string;
 
   constructor(x = 0, y = 0, width = 0, height = 0) {
     super(x, y, width, height);
-    this.sprites = new Set<Sprite>();
+    this.background = "white";
   }
 
-  add(...sprites: Array<Sprite>): void {
-    for (const s of sprites) {
-      this.sprites.add(s);
-    }
+  update(g: GraphicsContext): void {
+    g.p5.rect(this.x, this.y, this.width, this.height);
   }
 
-  override paint(g: GraphicsContext): void {
-    super.paint(g);
-    for (const s of this.sprites) {
+  paint(g: GraphicsContext): void {
+    g.p5.fill(this.background);
+    this.update(g);
+    for (const s of this.elements) {
       s.paint(g);
     }
   }

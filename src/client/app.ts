@@ -3,7 +3,7 @@ import {
   Ball,
   Paddle,
   Table
-} from "../common/pong/pong";
+} from "./lib/pong";
 import {
   PongClient,
   PongEvent,
@@ -15,7 +15,7 @@ import {
 } from "../common/pong/messages";
 import {P5App} from "./lib/p5app";
 //import {PongEngine} from "../common/pong/engine";
-import {GraphicsContext} from "../common/pong/gfx";
+import {GraphicsContext} from "./lib/gfx";
 
 
 // Support multiple deployment targets: local | local+docker | hosted.

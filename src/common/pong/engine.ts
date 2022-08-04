@@ -6,7 +6,10 @@ import {
   Ball,
   Paddle,
   Table
-} from "./pong.js";
+} from "./elements.js";
+
+
+const frameRate = 1000 / 30; // 30 fps
 
 
 export class PongEngine {
@@ -24,7 +27,6 @@ export class PongEngine {
     this.screenHeight = 370;
 
     this.table = new Table(0, 0, this.screenWidth, this.screenHeight);
-    this.table.background = "black";
 
     this.ball = new Ball(250, 100);
     this.ball.vx = 12;
@@ -48,7 +50,7 @@ export class PongEngine {
   start() {
     setInterval(() => {
       this.update();
-    }, 1000 / 30);
+    }, frameRate);
   }
 
   movePaddle(id: number, y: number): void {
@@ -70,7 +72,7 @@ export class PongEngine {
       const self = this;
       setTimeout(() => {
         if (self.cb) self.cb(e);
-      }, 0);
+      });
     }
   }
 
