@@ -67,6 +67,7 @@ class PongApp extends P5App {
     this.external = document.getElementById("external");
 
     this.client = new PongClient(hosts);
+    // TODO Improve: this works (can't await in the constructor) but not optimal
     this.client.connect();
     this.client.onchange = this.onmessage.bind(this);
 
@@ -76,6 +77,7 @@ class PongApp extends P5App {
 
     const ball = new Ball(250, 100);
 
+    // TODO: this is a temporary hack
     const player1 = new Paddle(30, 250);
     player1.upKey = 65;    // up:   'a'
     player1.downKey = 90;  // down: 'z'
@@ -88,14 +90,12 @@ class PongApp extends P5App {
 
     // TODO: need player id assigned from server
     player1.onchange(y => {
-      ////pongEngine.movePaddle(0, y);
       this.client.send({
         id: 0,
         y: y
       });
     });
     player2.onchange(y => {
-      //pongEngine.movePaddle(1, y);
       this.client.send({
         id: 1,
         y: y
@@ -117,7 +117,6 @@ class PongApp extends P5App {
       throw new Error(`canvas.parent(${this.parent}) Is '${this.parent}' the correct element?) ${err}`);
     }
     this.p5.frameRate(60);
-//    this.pongEngine.start();
   }
 
   override draw() {
@@ -127,7 +126,7 @@ class PongApp extends P5App {
   }
 
   private onmessage(e: PongEvent<Message>): void {
-    console.log(e);
+    // console.log(e);
     if (e.message instanceof StatsUpdate) {
       const m = e.message as StatsUpdate;
       this.user!.textContent = m.stats.cpu.user;

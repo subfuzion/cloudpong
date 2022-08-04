@@ -92,12 +92,11 @@ export class PongWebSocketServer {
     const game = new PongEngine();
 
     game.onStateChange((m: Message) => {
-      console.log(m);
+      // console.log(m);
       ws.send(JSON.stringify(m));
     });
 
     ws.on("message", data => {
-//      console.log(data);
       const m = JSON.parse(data.toString());
       game.movePaddle(m.id, m.y);
     });

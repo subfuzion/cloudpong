@@ -40,11 +40,11 @@ export class PongEngine {
 
     this.player1 = new Paddle(30, 250);
     this.player1.y = (this.table.height - this.player1.height) / 2;
-    this.player1.vy = 8;
+    this.player1.vy = 10;
 
     this.player2 = new Paddle(this.table.width - 50, 250);
     this.player2.y = (this.table.height - this.player2.height) / 2;
-    this.player2.vy = 8;
+    this.player2.vy = 10;
 
     this.table.add(this.ball, this.player1, this.player2);
   }
