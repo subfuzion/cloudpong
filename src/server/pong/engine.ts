@@ -1,6 +1,6 @@
 import {
   Update,
-  Message,
+  Message
 } from "../../common/pong/messages.js";
 import {
   Ball,
@@ -9,10 +9,15 @@ import {
 } from "../../common/pong/elements.js";
 
 
-const frameRate = 1000 / 30; // 30 fps
+const defaultFrameRate = 1000 / 30; // 30 fps
 
 
+/**
+ * PongEngine provides the authoritative state of play. This state is updated
+ * on each invocation of `update` (according to `frameRate` (frames per second).
+ */
 export class PongEngine {
+  frameRate: number;
   screenWidth: number;
   screenHeight: number;
   table: Table;
@@ -22,7 +27,8 @@ export class PongEngine {
 
   cb: ((e: Message) => void) | null = null;
 
-  constructor() {
+  constructor(frameRate: number = defaultFrameRate) {
+    this.frameRate = frameRate;
     this.screenWidth = 600;
     this.screenHeight = 370;
 
@@ -50,7 +56,7 @@ export class PongEngine {
   start() {
     setInterval(() => {
       this.update();
-    }, frameRate);
+    }, this.frameRate);
   }
 
   movePaddle(id: number, y: number): void {

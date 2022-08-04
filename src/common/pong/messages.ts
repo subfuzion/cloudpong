@@ -1,8 +1,23 @@
+/**
+ * This module defines all the messages passed over WebSockets between game
+ * client and server.
+ */
+
+
+/**
+ * A message can be serialized and unserialized.
+ */
 export class Message {
   type(): string {
     return this.constructor.name;
   }
 }
+
+
+export class ServerMessage extends Message {}
+
+
+export class ClientMessage extends Message {}
 
 
 export class WebSocketError extends Message {
@@ -15,7 +30,7 @@ export class WebSocketError extends Message {
 }
 
 
-export class Update extends Message {
+export class Update extends ServerMessage {
   x: number;
   y: number;
   vx: number;
@@ -52,7 +67,7 @@ export class Update extends Message {
 }
 
 
-export class StatsUpdate extends Message {
+export class StatsUpdate extends ServerMessage {
   id: string;
   stats: {
     rss: string;

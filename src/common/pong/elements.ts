@@ -1,5 +1,15 @@
 /**
- * An element represents a physical object in the game.
+ * This module provides a common base for game elements that are modeled on both
+ * the client and the server.
+ * - The server game engine operates in "headless" mode while updating and
+ *   broadcasting game state to player and spectator clients.
+ * - The client is responsible for rendering objects on the game screen and
+ *   sending active player events to the server.
+ */
+
+
+/**
+ * An element represents (and models the physics of) physical game objects.
  */
 export class Element {
   x: number;
