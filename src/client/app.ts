@@ -14,21 +14,16 @@ import {
   StatsUpdate
 } from "../common/pong/messages";
 import {P5App} from "./lib/p5app";
-//import {PongEngine} from "../common/pong/engine";
 import {GraphicsContext} from "./lib/gfx";
 
 
-// Support multiple deployment targets: local | local+docker | hosted.
+// Supports multiple deployment targets: local | local+docker | hosted.
 // Supports webpack devServer (frontend :8080, backend :8081).
 const WS_PROTOCOL = location.protocol === "https:" ? "wss:" : "ws:";
 const WS_HOSTS = [
   `${WS_PROTOCOL}//${location.host}`,
   `${WS_PROTOCOL}//${location.hostname}:8081`,
 ];
-
-process.env.NODE_ENV ===
-"development" ? `${WS_PROTOCOL}//localhost:8081` :
-`${WS_PROTOCOL}//${location.host}`;
 
 
 class PongApp extends P5App {
@@ -126,7 +121,6 @@ class PongApp extends P5App {
   }
 
   private onmessage(e: PongEvent<Message>): void {
-    // console.log(e);
     if (e.message instanceof StatsUpdate) {
       const m = e.message as StatsUpdate;
       this.user!.textContent = m.stats.cpu.user;
