@@ -63,7 +63,6 @@ export class PongClient {
       });
     };
 
-    // TODO: cleanup for the other ws
     return new Promise((resolve, reject) => {
       const connections = hosts.map(host => _connect(host));
       Promise.any(connections)

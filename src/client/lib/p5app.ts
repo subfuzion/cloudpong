@@ -44,7 +44,6 @@ export class P5App {
       new P5((p5: P5) => {
         try {
           const instance = new type(p5, parent, width, height, hosts);
-          //  TODO: start
           resolve(instance);
         } catch (err) {
           reject(err);
