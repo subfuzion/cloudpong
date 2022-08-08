@@ -152,7 +152,7 @@ async function main(): Promise<void> {
   // const hosts = [host, `${protocol}//${location.hostname}:8081`];
   const hosts = [host];
 
-  // "pong" is the DOM element is used for rendering the p5 canvas.
+  // "pong" is the DOM element that's used for rendering the p5 canvas.
   const app = await P5App.create(PongApp, "pong", 600, 370, hosts);
   await app.connect(hosts);
 }
