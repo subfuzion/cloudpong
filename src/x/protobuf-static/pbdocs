@@ -1,3 +1,0 @@
-#!/bin/sh
-../node_modules/protobufjs/bin/pbjs 2>&1 | sed -r 's/\x1b\[[0-9;]*m//g' > pbjs.md
-../node_modules/protobufjs/bin/pbts 2>&1 | sed -r 's/\x1b\[[0-9;]*m//g' > pbts.md
