@@ -25,5 +25,5 @@ COPY --from=builder /usr/src/app/dist .
 COPY --from=builder /usr/src/app/node_modules ./node_modules
 
 # The app shares common library code between the browser and backend.
-# The option is needed to allow imports without file extensions.
+# The experimental option is needed to allow imports without file extensions.
 CMD ["--experimental-specifier-resolution=node", "server/main.js"]
