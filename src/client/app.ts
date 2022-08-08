@@ -17,15 +17,6 @@ import {P5App} from "./lib/p5app";
 import {GraphicsContext} from "./lib/gfx";
 
 
-// Supports multiple deployment targets: local | local+docker | hosted.
-// Supports webpack devServer (frontend :8080, backend :8081).
-const WS_PROTOCOL = location.protocol === "https:" ? "wss:" : "ws:";
-const WS_HOSTS = [
-  `${WS_PROTOCOL}//${location.host}`,
-  `${WS_PROTOCOL}//${location.hostname}:8081`,
-];
-
-
 class PongApp extends P5App {
   // stats dom elements
   user: HTMLElement | null;
@@ -37,7 +28,7 @@ class PongApp extends P5App {
   external: HTMLElement | null;
 
   // game engine client
-  client: PongClient;
+  client?: PongClient;
 
   // game objects
   table: Table;
@@ -49,8 +40,7 @@ class PongApp extends P5App {
       p5: P5,
       parent: string | Element | object,
       width: number,
-      height: number,
-      hosts: Array<string>) {
+      height: number) {
     super(p5, parent, width, height);
 
     this.user = document.getElementById("user");
@@ -60,11 +50,6 @@ class PongApp extends P5App {
     this.heapTotal = document.getElementById("heapTotal");
     this.heapUsed = document.getElementById("heapUsed");
     this.external = document.getElementById("external");
-
-    this.client = new PongClient(hosts);
-    // TODO Improve: this works (can't await in the constructor) but not optimal
-    this.client.connect();
-    this.client.onchange = this.onmessage.bind(this);
 
     // game objects
     const table = new Table(0, 0, this.width, this.height);
@@ -85,13 +70,13 @@ class PongApp extends P5App {
 
     // TODO: need player id assigned from server
     player1.onchange(y => {
-      this.client.send({
+      this.client!.send({
         id: 0,
         y: y
       });
     });
     player2.onchange(y => {
-      this.client.send({
+      this.client!.send({
         id: 1,
         y: y
       });
@@ -120,6 +105,12 @@ class PongApp extends P5App {
     this.table.paint(g);
   }
 
+  async connect(hosts: Array<string>): Promise<void> {
+    this.client = new PongClient(hosts);
+    await this.client.connect();
+    this.client.onchange = this.onmessage.bind(this);
+  }
+
   private onmessage(e: PongEvent<Message>): void {
     if (e.message instanceof StatsUpdate) {
       const m = e.message as StatsUpdate;
@@ -143,5 +134,20 @@ class PongApp extends P5App {
 }
 
 
-// "pong" is the DOM element that will be used for the p5 canvas.
-await P5App.create(PongApp, "pong", 600, 370, WS_HOSTS);
+async function main(): Promise<void> {
+  // Supports multiple deployment targets: local | local+docker | hosted.
+  const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+  // Supports webpack devServer (frontend :8080, backend :8081).
+  const hosts = [
+    `${protocol}//${location.host}`,
+    `${protocol}//${location.hostname}:8081`,
+  ];
+
+
+  // "pong" is the DOM element that will be used for the p5 canvas.
+  const app = await P5App.create(PongApp, "pong", 600, 370, hosts);
+  await app.connect(hosts);
+}
+
+
+await main();

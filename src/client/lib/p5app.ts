@@ -33,7 +33,6 @@ export class P5App {
    * @param width The width of the P5 canvas.
    * @param height The height of the P5 canvas.
    * @param hosts The WebSocket server addresses (wss://example.com).
-   * @param cb Use the callback if you want a reference to the new object.
    */
   static async create<T extends P5App>(
       type: { new(...args: any[]): T },

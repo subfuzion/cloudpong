@@ -36,16 +36,25 @@ export class PongClient {
     this.ws!.send(m);
   }
 
-  async connect(): Promise<WebSocket> {
+  async connect(timeout = 5 * 1000): Promise<WebSocket> {
     console.log("connecting to", this.hosts);
     const self = this;
     const hosts = this.hosts;
+    // map pending websocket connections to timers
+    const pending = new Map<WebSocket, NodeJS.Timeout>();
 
     const _connect = (host: string): Promise<WebSocket> => {
       return new Promise((resolve, reject) => {
         try {
+          const timer = setTimeout(() => {
+            throw new Error(`websocket connection attempt timed out (${timeout} ms)`);
+          }, timeout);
           const ws = new WebSocket(host);
+          console.log(`attempting to connect to ${ws.url}`);
+          pending.set(ws, timer);
           ws.addEventListener("open", () => {
+            console.log(`clearing timeout for ${ws.url}`);
+            clearTimeout(timer);
             resolve(ws);
           });
         } catch (err) {
@@ -63,6 +72,20 @@ export class PongClient {
                ws.onmessage = self.handleMessage.bind(self);
                ws.onerror = self.handleError.bind(self);
                self.ws = ws;
+
+               // clear pending
+               for (const [s, timer] of pending.entries()) {
+                 if (s != ws) {
+                   console.log(`clearing timeout for ${s.url}`);
+                   clearTimeout(timer);
+                   try {
+                     s.close();
+                   } catch (ignore) {
+                     console.log(`canceled websocket for ${s.url}`);
+                   }
+                 }
+               }
+
                resolve(ws);
              })
              .catch(err => reject(err));

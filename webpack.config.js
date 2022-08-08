@@ -49,7 +49,8 @@ export default env => {
     },
     devServer: {
       client: {
-        webSocketURL: "ws://0.0.0.0:8081",
+        reconnect: false,
+        // webSocketURL: "ws://0.0.0.0:8081",
       },
     },
   };
