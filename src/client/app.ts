@@ -136,15 +136,24 @@ class PongApp extends P5App {
 
 async function main(): Promise<void> {
   // Supports multiple deployment targets: local | local+docker | hosted.
+  // If served from a secure host, then need to use `wss` for websockets.
   const protocol = location.protocol === "https:" ? "wss:" : "ws:";
-  // Supports webpack devServer (frontend :8080, backend :8081).
-  const hosts = [
-    `${protocol}//${location.host}`,
-    `${protocol}//${location.hostname}:8081`,
-  ];
 
+  // Can serve frontend and backend from different hosts:
+  // - during development (using the webpack devServer for frontend).
+  // - in production (for example, to serve frontend from CDN).
+  // Define PONGHOST using DefinePlugin in webpack.config.js. If it is not set,
+  // then assume that the host is where the frontend was served from.
+  // @ts-ignore (PONGHOST is declared externally in webpack config)
+  const host = PONGHOST ? PONGHOST : `${protocol}//${location.host}`;
 
-  // "pong" is the DOM element that will be used for the p5 canvas.
+  // Can have multiple websocket servers.
+  // The client uses the websocket for the first host it can connect to.
+  // For example:
+  // const hosts = [host, `${protocol}//${location.hostname}:8081`];
+  const hosts = [host];
+
+  // "pong" is the DOM element is used for rendering the p5 canvas.
   const app = await P5App.create(PongApp, "pong", 600, 370, hosts);
   await app.connect(hosts);
 }

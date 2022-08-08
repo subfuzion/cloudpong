@@ -6,10 +6,8 @@ import webpack from "webpack";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-//webpack.compiler.hooks.beforeCompile;
-
 export default env => {
-  const mode = env.mode === "development" ? "development" : "production";
+  const mode = env.MODE === "development" ? "development" : "production";
 
   return {
     stats: "minimal",
@@ -41,8 +39,12 @@ export default env => {
         ],
       }),
       // Defining mode: production | development (above) will automatically set
-      // process.env.NODE_ENV
-      new webpack.DefinePlugin({}),
+      // process.env.NODE_ENV (but let's set explicitly, so we don't need to
+      // bring in nodejs support).
+      new webpack.DefinePlugin({
+        MODE: JSON.stringify(mode),
+        PONGHOST: JSON.stringify(env.PONGHOST),
+      }),
     ],
     experiments: {
       topLevelAwait: true,

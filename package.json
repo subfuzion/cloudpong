@@ -7,16 +7,19 @@
   "type": "module",
   "scripts": {
     "clean": "rm -rf dist",
-    "webpack": "webpack",
-    "webpack-server-xxx": "webpack server --quiet --no-info",
-    "webpack-server": "webpack server --env mode=development --env host=ws://localhost:8081",
-    "tsc": "tsc",
-    "dev-server": "PORT=8081 tsc-watch --noClear -p ./tsconfig.json --onSuccess 'node --experimental-specifier-resolution=node ./dist/server/main.js'",
     "build": "tsc && webpack",
+    "test": "echo 'No tests' && exit 0",
+    "[ FRONTEND ]": "⬇",
+    "webpack": "webpack",
+    "watch-frontend": "webpack server --env MODE=development --env PONGHOST=ws://localhost:8081",
+    "[ BACKEND ]": "⬇",
+    "tsc": "tsc",
+    "watch-backend": "PORT=8081 tsc-watch --noClear -p ./tsconfig.json --onSuccess 'node --experimental-specifier-resolution=node ./dist/server/main.js'",
+    "[ DEV ]": "⬇",
     "predev": "npm run clean",
-    "dev": "NODE_ENV=development concurrently 'npm run webpack-server' 'npm run dev-server'",
-    "start": "node --experimental-specifier-resolution=node ./dist/server/main.js",
-    "test": "echo 'No tests' && exit 0"
+    "dev": "NODE_ENV=development concurrently 'npm run watch-frontend' 'npm run watch-backend'",
+    "[ PRODUCTION ]": "⬇",
+    "start": "node --experimental-specifier-resolution=node ./dist/server/main.js"
   },
   "dependencies": {
     "cookie-parser": "~1.4.4",
