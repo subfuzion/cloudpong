@@ -16,6 +16,10 @@ import {Ball, Paddle, Table} from "./lib/sprites";
  *   update the mapper in this constructor and add a handler method.
  */
 export class PongApp extends P5App {
+  // Note: the server's target framerate is only 30 fps, but this framerate
+  // is intended to support any other animations we want to render.
+  static readonly DefaultFrameRate = 60;
+
   // stats dom elements
   user: HTMLElement | null;
   system: HTMLElement | null;
@@ -103,7 +107,7 @@ export class PongApp extends P5App {
     } catch (err) {
       throw new Error(`canvas.parent(${this.parent}) Is '${this.parent}' the correct element?) ${err}`);
     }
-    this.p5.frameRate(60);
+    this.p5.frameRate(PongApp.DefaultFrameRate);
   }
 
   override draw() {

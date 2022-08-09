@@ -9,14 +9,13 @@ import {
 } from "../../common/pong/elements.js";
 
 
-const defaultFrameRate = 1000 / 30; // 30 fps
-
-
 /**
  * PongEngine provides the authoritative state of play. This state is updated
- * on each invocation of `update` (according to `frameRate` (frames per second).
+ * on each call to `update` (determined by `frameRate`).
  */
 export class PongEngine {
+  static readonly DefaultFrameRate = 30; // fps
+
   frameRate: number;
   screenWidth: number;
   screenHeight: number;
@@ -27,7 +26,7 @@ export class PongEngine {
 
   cb: ((e: Message) => void) | null = null;
 
-  constructor(frameRate: number = defaultFrameRate) {
+  constructor(frameRate: number = PongEngine.DefaultFrameRate) {
     this.frameRate = frameRate;
     this.screenWidth = 600;
     this.screenHeight = 370;
@@ -54,9 +53,10 @@ export class PongEngine {
   }
 
   start() {
+    const frameInterval = 1000 / this.frameRate; // ms per frame
     setInterval(() => {
       this.update();
-    }, this.frameRate);
+    }, frameInterval);
   }
 
   movePaddle(id: number, y: number): void {
@@ -116,6 +116,7 @@ export class PongEngine {
     // off a paddle, vx increases by a constant and vy
     // increases by a random amount.
     // TODO: take into consideration where the ball hits the paddle.
+    // The original pong had 8 different paddle regions affecting bounce.
     if (reverse) {
       const xFactor = -1.1;
       const yFactor = 1 + (Math.random() * 0.5);

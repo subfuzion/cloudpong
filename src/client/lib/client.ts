@@ -8,6 +8,8 @@ import {
  * PongClient handles connections to the websocket server.
  */
 export class PongClient {
+  static readonly DefaultTimeout = 5 * 1000;
+
   hosts: Array<string>;
   mapper?: Map<string, [{ new(data: object): Message; }, (m: any) => void]>;
   cb: ((m: Message) => void) | null;
@@ -46,7 +48,7 @@ export class PongClient {
    * Connect to one of the websocket hosts specified in the constructor.
    * @param timeout In milliseconds.
    */
-  async connect(timeout = 5 * 1000): Promise<WebSocket> {
+  async connect(timeout = PongClient.DefaultTimeout): Promise<WebSocket> {
     console.log("connecting to", this.hosts);
     const self = this;
     const hosts = this.hosts;
