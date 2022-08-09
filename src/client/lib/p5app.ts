@@ -1,3 +1,4 @@
+import {GraphicsContext} from "./gfx";
 import P5, {Element} from "p5";
 
 
@@ -50,6 +51,10 @@ export class P5App {
         }
       });
     });
+  }
+
+  getGraphicsContext(): GraphicsContext {
+    return new GraphicsContext(this.p5, 0, 0, this.width, this.height);
   }
 
   /**

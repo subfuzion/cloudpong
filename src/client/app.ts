@@ -1,21 +1,23 @@
 import P5, {Element} from "p5";
 import {
+  Message,
+  StatsUpdate,
+  Update
+} from "../common/pong/messages";
+import {PongClient} from "./lib/client";
+import {P5App} from "./lib/p5app";
+import {
   Ball,
   Paddle,
   Table
-} from "./lib/pong";
-import {
-  PongClient,
-} from "./lib/client";
-import {
-  Update,
-  Message,
-  StatsUpdate
-} from "../common/pong/messages";
-import {P5App} from "./lib/p5app";
-import {GraphicsContext} from "./lib/gfx";
+} from "./lib/sprites";
 
 
+/**
+ * PongApp is responsible for setting up the game UI, but the UI is updated
+ * according to game state messages it receives from the server (even the
+ * player's paddle movements). The server is authoritative for game state.
+ */
 class PongApp extends P5App {
   // stats dom elements
   user: HTMLElement | null;
@@ -34,6 +36,12 @@ class PongApp extends P5App {
   ball: Ball;
   player1: Paddle;
   player2: Paddle;
+
+  // message mappers (maps message type string to message class)
+  mapper = new Map<string, { new(data: object): Message; }>;
+
+  // message handlers (maps message type to message handler)
+  handlers = new Map<string, (m: any) => void>;
 
   constructor(
       p5: P5,
@@ -56,7 +64,7 @@ class PongApp extends P5App {
 
     const ball = new Ball(250, 100);
 
-    // TODO: this is a temporary hack
+    // TODO: this is a temporary hack for player #1
     const player1 = new Paddle(30, 250);
     player1.upKey = 65;    // up:   'a'
     player1.downKey = 90;  // down: 'z'
@@ -85,6 +93,14 @@ class PongApp extends P5App {
     this.ball = ball;
     this.player1 = player1;
     this.player2 = player2;
+
+    // Message mappers (used by client to instantiate incoming messages).
+    this.mapper.set("Update", Update);
+    this.mapper.set("StatsUpdate", StatsUpdate);
+
+    // Message handlers (used to route incoming messages to handlers).
+    this.handlers.set("Update", this.update.bind(this));
+    this.handlers.set("StatsUpdate", this.statsUpdate.bind(this));
   }
 
   override setup() {
@@ -100,33 +116,42 @@ class PongApp extends P5App {
 
   override draw() {
     super.draw();
-    const g = new GraphicsContext(this.p5, 0, 0, this.width, this.height);
-    this.table.paint(g);
+    this.table.paint(this.getGraphicsContext());
   }
 
   async connect(hosts: Array<string>): Promise<void> {
-    this.client = new PongClient(hosts);
+    this.client = new PongClient(
+        hosts,
+        this.mapper,
+        this.onmessage.bind(this));
     await this.client.connect();
-    this.client.onchange = this.onmessage.bind(this);
   }
 
   private onmessage(m: Message): void {
-    if (m instanceof StatsUpdate) {
-      this.user!.textContent = m.stats.cpu.user;
-      this.system!.textContent = m.stats.cpu.system;
-      this.id!.textContent = m.id;
-      this.rss!.textContent = m.stats.memory.rss;
-      this.heapTotal!.textContent = m.stats.memory.heapTotal;
-      this.heapUsed!.textContent = m.stats.memory.heapUsed;
-      this.external!.textContent = m.stats.memory.external;
-    } else if (m instanceof Update) {
-      this.ball.x = m.x;
-      this.ball.y = m.y;
-      this.ball.vx = m.vx;
-      this.ball.vy = m.vy;
-      this.player1.y = m.player1y;
-      this.player2.y = m.player2y;
+    if (!this.handlers.has(m.type)) {
+      throw new Error(`Unrecognized message type: ${m.type}`);
     }
+    // Message types to handlers are mapped in the constructor.
+    this.handlers.get(m.type)!(m);
+  }
+
+  private update(m: Update): void {
+    this.ball.x = m.x;
+    this.ball.y = m.y;
+    this.ball.vx = m.vx;
+    this.ball.vy = m.vy;
+    this.player1.y = m.player1y;
+    this.player2.y = m.player2y;
+  }
+
+  private statsUpdate(m: StatsUpdate): void {
+    this.user!.textContent = m.stats.cpu.user;
+    this.system!.textContent = m.stats.cpu.system;
+    this.id!.textContent = m.id;
+    this.rss!.textContent = m.stats.memory.rss;
+    this.heapTotal!.textContent = m.stats.memory.heapTotal;
+    this.heapUsed!.textContent = m.stats.memory.heapUsed;
+    this.external!.textContent = m.stats.memory.external;
   }
 }
 

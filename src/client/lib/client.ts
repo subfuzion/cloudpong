@@ -1,20 +1,30 @@
 import {
   Message,
-  StatsUpdate,
-  Update,
   WebSocketError
 } from "../../common/pong/messages";
 
 
+/**
+ * PongClient handles connections to the websocket server.
+ */
 export class PongClient {
   hosts: Array<string>;
-  ws?: WebSocket;
+  mapper?: Map<string, { new(data: object): Message; }>;
   cb: ((m: Message) => void) | null;
+  ws?: WebSocket;
 
+  /**
+   *
+   * @param hosts An array of websocket server addresses.
+   * @param mapper Maps a message type (string) to a message class.
+   * @param cb The callback for messages.
+   */
   constructor(
       hosts: Array<string>,
+      mapper: Map<string, { new(data: object): Message }>,
       cb: (((m: Message) => void) | null) = null) {
     this.hosts = hosts;
+    this.mapper = mapper;
     this.cb = cb;
   }
 
@@ -22,11 +32,20 @@ export class PongClient {
     this.cb = cb;
   }
 
+  /**
+   * Send a message to the websocket server. There is no error checking here.
+   * If this method throws, it's probably because `connect` wasn't called first.
+   * @param message
+   */
   send(message: any) {
     const m = JSON.stringify(message);
     this.ws!.send(m);
   }
 
+  /**
+   * Connect to one of the websocket hosts specified in the constructor.
+   * @param timeout In milliseconds.
+   */
   async connect(timeout = 5 * 1000): Promise<WebSocket> {
     console.log("connecting to", this.hosts);
     const self = this;
@@ -63,19 +82,18 @@ export class PongClient {
                ws.onerror = self.handleError.bind(self);
                self.ws = ws;
 
-               // clear pending
+               // Clear any other pending connections.
                for (const [s, timer] of pending.entries()) {
-                 if (s != ws) {
-                   // console.log(`clearing timeout for ${s.url}`);
-                   clearTimeout(timer);
-                   try {
-                     s.close();
-                   } catch (ignore) {
-                     // console.log(`canceled websocket for ${s.url}`);
-                   }
+                 if (s === ws) continue;
+                 // console.log(`clearing timeout for ${s.url}`);
+                 clearTimeout(timer);
+                 try {
+                   s.close();
+                 } catch (ignore) {
+                   // Calling close before a websocket is open will still show
+                   // up in the console log as warning under Chrome.
                  }
                }
-
                resolve(ws);
              })
              .catch(err => reject(err));
@@ -84,19 +102,15 @@ export class PongClient {
 
   private handleMessage(msg: MessageEvent<any>) {
     const data = JSON.parse(msg.data.toString());
-    let m: Message;
-    switch (data.type) {
-      case "Update":
-        m = new Update(data);
-        this.emitChangeEvent(m);
-        break;
-      case "StatsUpdate":
-        m = new StatsUpdate(data);
-        this.emitChangeEvent(m);
-        break;
-      default:
-        console.log("Error: unrecognized message type: ${data.type}");
+    if (!this.mapper) {
+      throw new Error(`client needs to be configured with a message mapper`);
     }
+    if (!this.mapper.has(data.type)) {
+      throw new Error(`unrecognized message type: ${data.type}`);
+    }
+
+    const type = this.mapper.get(data.type);
+    this.emitChangeEvent(new type!(data));
   }
 
   private handleError(e: Event) {

@@ -5,6 +5,10 @@ import {
 } from "../../common/pong/elements";
 
 
+/**
+ * A GraphicsContext is used for rendering UI elements.
+ * The current implementation is extremely rudimentary.
+ */
 export class GraphicsContext {
   p5: P5;
   x: number;
@@ -22,6 +26,9 @@ export class GraphicsContext {
 }
 
 
+/**
+ * A UIElement is the base class for elements rendered on a P5 canvas.
+ */
 export interface UIElement extends Element {
   background: string;
 
@@ -31,7 +38,9 @@ export interface UIElement extends Element {
 }
 
 
-// A sprite is something that knows how to render an element on the P5 canvas.
+/**
+ * A sprite is something that knows how to render an element on the P5 canvas.
+ */
 export class Sprite extends Element implements UIElement {
   background: string;
 
@@ -51,7 +60,9 @@ export class Sprite extends Element implements UIElement {
 }
 
 
-// A view is a sprite that can also renders child sprites.
+/**
+ * A view is a sprite that can also renders child sprites.
+ */
 export class View extends Container<Sprite> implements UIElement {
   background: string;
 

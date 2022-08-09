@@ -18,6 +18,13 @@ export class Message {
   }
 
   /**
+   * Returns the name of this class.
+   */
+  get type(): string {
+    return this.constructor.name;
+  }
+
+  /**
    *
    * @param type The message (sub)class. Must have a zero-argument constructor.
    * @param s The JSON string.
@@ -37,19 +44,12 @@ export class Message {
   }
 
   /**
-   * Returns the name of this class.
-   */
-  type(): string {
-    return this.constructor.name;
-  }
-
-  /**
    * Ensures messages are serialized with a "type" property.
    * If overriding, call `super.toJSON()` and then add additional properties.
    */
   toJSON(): object {
     const j: any = {
-      type: this.type(),
+      type: this.type,
     };
     for (const [key, value] of Object.entries(this)) {
       j[key] = value;
@@ -71,7 +71,7 @@ export class Message {
     if (data) {
       const self: any = this;
       for (const [key, val] of Object.entries(data)) {
-        self[key] = val;
+        if (key !== "type") self[key] = val;
       }
     }
   }
