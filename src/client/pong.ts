@@ -77,14 +77,15 @@ export class PongApp extends P5App {
     player1.upKey = 65;    // up:   'a'
     player1.downKey = 90;  // down: 'z'
 
-    // TODO: player2 is just a hack right now until player matching works.
+    // TODO: player2 is a hack right now until player matching works (and maybe
+    // single player mode).
     const player2 = new Paddle(table.width - 50, 250);
     player2.upKey = p5.UP_ARROW;
     player2.downKey = p5.DOWN_ARROW;
 
     table.add(ball, player1, player2);
 
-    // TODO: need actual player id assigned from server
+    // TODO: need actual player id assigned from server.
     player1.onchange(y => { this.client!.send({id: 0, y: y}); });
     player2.onchange(y => { this.client!.send({id: 1, y: y}); });
 
