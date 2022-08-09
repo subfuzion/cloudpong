@@ -9,7 +9,7 @@ import {
  */
 export class PongClient {
   hosts: Array<string>;
-  mapper?: Map<string, { new(data: object): Message; }>;
+  mapper?: Map<string, [{ new(data: object): Message; }, (m: any) => void]>;
   cb: ((m: Message) => void) | null;
   ws?: WebSocket;
 
@@ -21,7 +21,7 @@ export class PongClient {
    */
   constructor(
       hosts: Array<string>,
-      mapper: Map<string, { new(data: object): Message }>,
+      mapper: Map<string, [{ new(data: object): Message; }, (m: any) => void]>,
       cb: (((m: Message) => void) | null) = null) {
     this.hosts = hosts;
     this.mapper = mapper;
@@ -109,7 +109,13 @@ export class PongClient {
       throw new Error(`unrecognized message type: ${data.type}`);
     }
 
-    const type = this.mapper.get(data.type);
+    const type = this.mapper.get(data.type)![0];
+    const m = new type!(data);
+    const handler = this.mapper.get(data.type)![1];
+    setTimeout(() => {
+      handler(m);
+    });
+
     this.emitChangeEvent(new type!(data));
   }
 

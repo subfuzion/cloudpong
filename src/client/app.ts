@@ -37,11 +37,9 @@ class PongApp extends P5App {
   player1: Paddle;
   player2: Paddle;
 
-  // message mappers (maps message type string to message class)
-  mapper = new Map<string, { new(data: object): Message; }>;
+  // Maps message type to a [message class, handler].
+  mapper = new Map<string, [{ new(data: object): Message; }, (m: any) => void]>;
 
-  // message handlers (maps message type to message handler)
-  handlers = new Map<string, (m: any) => void>;
 
   constructor(
       p5: P5,
@@ -94,13 +92,10 @@ class PongApp extends P5App {
     this.player1 = player1;
     this.player2 = player2;
 
-    // Message mappers (used by client to instantiate incoming messages).
-    this.mapper.set("Update", Update);
-    this.mapper.set("StatsUpdate", StatsUpdate);
-
-    // Message handlers (used to route incoming messages to handlers).
-    this.handlers.set("Update", this.update.bind(this));
-    this.handlers.set("StatsUpdate", this.statsUpdate.bind(this));
+    // Message mappers used by client to instantiate incoming messages and
+    // route to their handlers.
+    this.mapper.set("Update", [Update, this.update.bind(this)]);
+    this.mapper.set("StatsUpdate", [StatsUpdate, this.statsUpdate.bind(this)]);
   }
 
   override setup() {
@@ -120,19 +115,11 @@ class PongApp extends P5App {
   }
 
   async connect(hosts: Array<string>): Promise<void> {
-    this.client = new PongClient(
-        hosts,
-        this.mapper,
-        this.onmessage.bind(this));
+    this.client = new PongClient(hosts, this.mapper);
     await this.client.connect();
   }
 
   private onmessage(m: Message): void {
-    if (!this.handlers.has(m.type)) {
-      throw new Error(`Unrecognized message type: ${m.type}`);
-    }
-    // Message types to handlers are mapped in the constructor.
-    this.handlers.get(m.type)!(m);
   }
 
   private update(m: Update): void {
