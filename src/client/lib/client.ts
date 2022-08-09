@@ -12,26 +12,18 @@ export class PongClient {
 
   hosts: Array<string>;
   mapper?: Map<string, [{ new(data: object): Message; }, (m: any) => void]>;
-  cb: ((m: Message) => void) | null;
   ws?: WebSocket;
 
   /**
    *
    * @param hosts An array of websocket server addresses.
    * @param mapper Maps a message type (string) to a message class.
-   * @param cb The callback for messages.
    */
   constructor(
       hosts: Array<string>,
-      mapper: Map<string, [{ new(data: object): Message; }, (m: any) => void]>,
-      cb: (((m: Message) => void) | null) = null) {
+      mapper: Map<string, [{ new(data: object): Message; }, (m: any) => void]>) {
     this.hosts = hosts;
     this.mapper = mapper;
-    this.cb = cb;
-  }
-
-  set onchange(cb: (m: Message) => void) {
-    this.cb = cb;
   }
 
   /**
@@ -103,38 +95,37 @@ export class PongClient {
   }
 
   private handleMessage(msg: MessageEvent<any>) {
-    const data = JSON.parse(msg.data.toString());
     if (!this.mapper) {
       throw new Error(`client needs to be configured with a message mapper`);
     }
-    if (!this.mapper.has(data.type)) {
+
+    const data = JSON.parse(msg.data.toString());
+    const tuple = this.mapper.get(data.type);
+    if (!tuple) {
       throw new Error(`unrecognized message type: ${data.type}`);
     }
 
-    // TODO: wanted to destructure type and handler, but types are fighting me.
-    // Revisit later.
-    const type = this.mapper.get(data.type)![0];
+    const [type, handler] = tuple;
     const m = new type!(data);
-    const handler = this.mapper.get(data.type)![1];
-    setTimeout(() => {
-      handler(m);
-    });
-
-    this.emitChangeEvent(new type!(data));
+    this.emitMessage(handler, m);
   }
 
   private handleError(e: Event) {
     console.log(e);
-    const data = new WebSocketError({message: e.type});
-    this.emitChangeEvent(new WebSocketError(data));
+    if (!this.mapper) {
+      throw new Error(`client needs to be configured with a message mapper`);
+    }
+
+    const tuple = this.mapper.get(WebSocketError.name);
+    if (!tuple) {
+      throw new Error(`client needs to be configured with a WebSocketError handler`);
+    }
+    const [, handler] = tuple;
+    const m = new WebSocketError({message: e.type});
+    this.emitMessage(handler, m);
   }
 
-  private emitChangeEvent(m: Message): void {
-    if (this.cb) {
-      setTimeout(() => {
-        if (this.cb) this.cb(m);
-      });
-    }
+  private emitMessage(handler: (me: Message) => void, m: Message): void {
+    setTimeout(() => handler(m));
   }
 }
-

@@ -1,5 +1,7 @@
 import P5, {Element} from "p5";
-import {Message, StatsUpdate, Update} from "../common/pong/messages";
+import {
+  Message, StatsUpdate, Update, WebSocketError
+} from "../common/pong/messages";
 import {PongClient} from "./lib/client";
 import {P5App} from "./lib/p5app";
 import {Ball, Paddle, Table} from "./lib/sprites";
@@ -53,8 +55,13 @@ export class PongApp extends P5App {
     // and route them to handler methods on this instance.
     // TODO: using a tuple right now, but probably want to create a dedicated
     // type.
-    this.mapper.set("Update", [Update, this.update.bind(this)]);
-    this.mapper.set("StatsUpdate", [StatsUpdate, this.statsUpdate.bind(this)]);
+    this.mapper.set("Update", [Update, this.onUpdate.bind(this)]);
+    this.mapper.set(
+        "StatsUpdate",
+        [StatsUpdate, this.onStatsUpdate.bind(this)]);
+    this.mapper.set(
+        "WebSocketError",
+        [WebSocketError, this.onWebSocketError.bind(this)]);
 
     // DOM elements (updated by StatsUpdate messages).
     // This is just a temporary example; the stats will be different and
@@ -120,7 +127,12 @@ export class PongApp extends P5App {
     await this.client.connect();
   }
 
-  private update(m: Update): void {
+  private onWebSocketError(m: WebSocketError) {
+    // TODO: try to reconnect a few times, stop game, ...?
+    console.log(m);
+  }
+
+  private onUpdate(m: Update): void {
     this.ball.x = m.x;
     this.ball.y = m.y;
     this.ball.vx = m.vx;
@@ -129,7 +141,7 @@ export class PongApp extends P5App {
     this.player2.y = m.player2y;
   }
 
-  private statsUpdate(m: StatsUpdate): void {
+  private onStatsUpdate(m: StatsUpdate): void {
     this.user!.textContent = m.stats.cpu.user;
     this.system!.textContent = m.stats.cpu.system;
     this.id!.textContent = m.id;

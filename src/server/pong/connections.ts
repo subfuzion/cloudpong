@@ -81,9 +81,7 @@ export class Connections extends EventEmitter {
   startBroadcasting(
       g: () => Generator<[Client, any]>,
       intervalMs: number): void {
-    this.intervalId = setInterval(() => {
-      this.broadcastg(g());
-    }, intervalMs);
+    this.intervalId = setInterval(() => this.broadcastg(g()), intervalMs);
   }
 
   stopBroadcasting() {
