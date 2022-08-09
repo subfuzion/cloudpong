@@ -26,7 +26,7 @@ export class Message {
 
   /**
    *
-   * @param type The message (sub)class. Must have a zero-argument constructor.
+   * @param type The message subclass (must have a single-argument constructor).
    * @param s The JSON string.
    */
   static parseJSON<T extends Message>(
@@ -35,7 +35,7 @@ export class Message {
     const j = JSON.parse(s);
     if (!j.type) throw new Error(`No property "type" on ${s}`);
     if (this.name !=
-        j.type) throw new Error(`Parsing ${j.type}: can't parse as ${this.name}`);
+        j.type) throw new Error(`Can't parse ${j.type} as ${this.name}`);
 
     // Safe equivalent to using eval, such as:
     // const o: any = eval(`new ${this.name}`);
@@ -119,25 +119,15 @@ export class StatsUpdate extends ServerMessage {
   id = "";
   stats: {
     cpu: {
-      user: string,
-      system: string,
-    },
-    memory: {
-      rss: string;
-      heapTotal: string;
-      heapUsed: string;
-      external: string;
+      user: string, system: string,
+    }, memory: {
+      rss: string; heapTotal: string; heapUsed: string; external: string;
     }
   } = {
     cpu: {
-      user: "",
-      system: "",
-    },
-    memory: {
-      rss: "",
-      heapTotal: "",
-      heapUsed: "",
-      external: "",
+      user: "", system: "",
+    }, memory: {
+      rss: "", heapTotal: "", heapUsed: "", external: "",
     }
   };
 

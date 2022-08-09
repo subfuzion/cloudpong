@@ -1,22 +1,19 @@
 import P5, {Element} from "p5";
-import {
-  Message,
-  StatsUpdate,
-  Update
-} from "../common/pong/messages";
+import {Message, StatsUpdate, Update} from "../common/pong/messages";
 import {PongClient} from "./lib/client";
 import {P5App} from "./lib/p5app";
-import {
-  Ball,
-  Paddle,
-  Table
-} from "./lib/sprites";
+import {Ball, Paddle, Table} from "./lib/sprites";
 
 
 /**
  * PongApp is responsible for setting up the game UI, but the UI is updated
  * according to game state messages it receives from the server (even the
  * player's paddle movements). The server is authoritative for game state.
+ *
+ * The bulk of modifying the game for the browser app is here, but:
+ * - If more UI elements (sprites) are needed, add them to ./lib/sprites.ts.
+ * - If more messages are needed, add them to ../common/messages.ts, and then
+ *   update the mapper in this constructor and add a handler method.
  */
 export class PongApp extends P5App {
   // stats dom elements
