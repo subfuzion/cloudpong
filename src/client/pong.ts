@@ -133,6 +133,8 @@ export class PongApp extends P5App {
     throw new Error(`WebSocketError: ${m.message}`);
   }
 
+  // TODO: potential optimization: only report vector changes, let client
+  // compute, occasionally synchronize/reconcile?
   private onUpdate(m: Update): void {
     this.ball.x = m.x;
     this.ball.y = m.y;
