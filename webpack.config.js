@@ -12,7 +12,7 @@ export default env => {
   return {
     stats: "minimal",
     mode: mode,
-    entry: "./src/client/app.ts",
+    entry: "./src/client/main.ts",
     devtool: "inline-source-map",
     module: {
       rules: [
