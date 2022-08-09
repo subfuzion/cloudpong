@@ -5,6 +5,7 @@ import {
 import {PongClient} from "./lib/client";
 import {P5App} from "./lib/p5app";
 import {Ball, Paddle, Table} from "./lib/sprites";
+import {Page} from "./page";
 
 
 /**
@@ -22,17 +23,8 @@ export class PongApp extends P5App {
   // is intended to support any other animations we want to render.
   static readonly DefaultFrameRate = 60;
 
-  // stats dom elements
-  user: HTMLElement | null;
-  system: HTMLElement | null;
-  id: HTMLElement | null;
-  rss: HTMLElement | null;
-  heapTotal: HTMLElement | null;
-  heapUsed: HTMLElement | null;
-  external: HTMLElement | null;
-
-  // game engine client
-  client?: PongClient;
+  // page (for manipulating things outside the game canvas)
+  page: Page;
 
   // game objects
   table: Table;
@@ -40,8 +32,11 @@ export class PongApp extends P5App {
   player1: Paddle;
   player2: Paddle;
 
-  // Maps message type to a [message class, handler].
+  // Maps message type to a [message class, message handler].
   mapper = new Map<string, [{ new(data: object): Message; }, (m: any) => void]>;
+
+  // game engine client
+  client?: PongClient;
 
 
   constructor(
@@ -51,30 +46,10 @@ export class PongApp extends P5App {
       height: number) {
     super(p5, parent, width, height);
 
-    // Message mapper used by websocket client to instantiate incoming messages
-    // and route them to handler methods on this instance.
-    // TODO: using a tuple right now, but probably want to create a dedicated
-    // type.
-    this.mapper.set("Update", [Update, this.onUpdate.bind(this)]);
-    this.mapper.set(
-        "StatsUpdate",
-        [StatsUpdate, this.onStatsUpdate.bind(this)]);
-    this.mapper.set(
-        "WebSocketError",
-        [WebSocketError, this.onWebSocketError.bind(this)]);
-
-    // DOM elements (updated by StatsUpdate messages).
-    // This is just a temporary example; the stats will be different and
-    // rendered as part of the game UI.
-    this.user = document.getElementById("user");
-    this.system = document.getElementById("system");
-    this.id = document.getElementById("id");
-    this.rss = document.getElementById("rss");
-    this.heapTotal = document.getElementById("heapTotal");
-    this.heapUsed = document.getElementById("heapUsed");
-    this.external = document.getElementById("external");
-
+    // HTML UI (updated by StatsUpdate messages).
     //
+    this.page = new Page();
+
     // Game UI (updated by Update messages).
     //
     const table = new Table(0, 0, this.width, this.height);
@@ -104,6 +79,21 @@ export class PongApp extends P5App {
     this.ball = ball;
     this.player1 = player1;
     this.player2 = player2;
+
+    // Message handling.
+    //
+    // Message mapper used by websocket client to instantiate incoming messages
+    // and route them to handler methods on this instance.
+    // TODO: using a tuple right now, but probably want to create a dedicated
+    // type.
+    this.mapper.set("Update", [Update, this.onUpdate.bind(this)]);
+    this.mapper.set(
+        "StatsUpdate",
+        [StatsUpdate, this.onStatsUpdate.bind(this)]);
+    this.mapper.set(
+        "WebSocketError",
+        [WebSocketError, this.onWebSocketError.bind(this)]);
+
   }
 
   override setup() {
@@ -145,12 +135,6 @@ export class PongApp extends P5App {
   }
 
   private onStatsUpdate(m: StatsUpdate): void {
-    this.user!.textContent = m.stats.cpu.user;
-    this.system!.textContent = m.stats.cpu.system;
-    this.id!.textContent = m.id;
-    this.rss!.textContent = m.stats.memory.rss;
-    this.heapTotal!.textContent = m.stats.memory.heapTotal;
-    this.heapUsed!.textContent = m.stats.memory.heapUsed;
-    this.external!.textContent = m.stats.memory.external;
+    this.page.setStats(m);
   }
 }

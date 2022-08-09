@@ -1,8 +1,7 @@
 /**
- * This is the entrypoint for the server. It starts an Express app
- * for handling HTTP connections and wraps it with PongWebSocketServer
- * to handle WebSocket connection upgrades for bi-directional game
- * traffic.
+ * This is the entrypoint for the server. It starts an Express app for handling
+ * HTTP connections and wraps it with PongWebSocketServer to handle WebSocket
+ * connection upgrades for bidirectional game traffic.
  */
 
 import {app} from "./app.js";
