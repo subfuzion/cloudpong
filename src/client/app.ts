@@ -6,7 +6,6 @@ import {
 } from "./lib/pong";
 import {
   PongClient,
-  PongEvent,
 } from "./lib/client";
 import {
   Update,
@@ -111,9 +110,8 @@ class PongApp extends P5App {
     this.client.onchange = this.onmessage.bind(this);
   }
 
-  private onmessage(e: PongEvent<Message>): void {
-    if (e.message instanceof StatsUpdate) {
-      const m = e.message as StatsUpdate;
+  private onmessage(m: Message): void {
+    if (m instanceof StatsUpdate) {
       this.user!.textContent = m.stats.cpu.user;
       this.system!.textContent = m.stats.cpu.system;
       this.id!.textContent = m.id;
@@ -121,8 +119,7 @@ class PongApp extends P5App {
       this.heapTotal!.textContent = m.stats.memory.heapTotal;
       this.heapUsed!.textContent = m.stats.memory.heapUsed;
       this.external!.textContent = m.stats.memory.external;
-    } else if (e.message instanceof Update) {
-      const m = e.message as Update;
+    } else if (m instanceof Update) {
       this.ball.x = m.x;
       this.ball.y = m.y;
       this.ball.vx = m.vx;

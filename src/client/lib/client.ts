@@ -6,28 +6,19 @@ import {
 } from "../../common/pong/messages";
 
 
-export class PongEvent<T extends Message> {
-  message: T;
-
-  constructor(message: T) {
-    this.message = message;
-  }
-}
-
-
 export class PongClient {
   hosts: Array<string>;
   ws?: WebSocket;
-  cb: ((e: PongEvent<Message>) => void) | null;
+  cb: ((m: Message) => void) | null;
 
   constructor(
       hosts: Array<string>,
-      cb: (((e: PongEvent<Message>) => void) | null) = null) {
+      cb: (((m: Message) => void) | null) = null) {
     this.hosts = hosts;
     this.cb = cb;
   }
 
-  set onchange(cb: (e: PongEvent<Message>) => void) {
+  set onchange(cb: (m: Message) => void) {
     this.cb = cb;
   }
 
@@ -94,17 +85,14 @@ export class PongClient {
   private handleMessage(msg: MessageEvent<any>) {
     const data = JSON.parse(msg.data.toString());
     let m: Message;
-    let e: PongEvent<Message>;
     switch (data.type) {
       case "Update":
         m = new Update(data);
-        e = new PongEvent<Update>(m as Update);
-        this.emitChangeEvent(e);
+        this.emitChangeEvent(m);
         break;
       case "StatsUpdate":
         m = new StatsUpdate(data);
-        e = new PongEvent<StatsUpdate>(m as StatsUpdate);
-        this.emitChangeEvent(e);
+        this.emitChangeEvent(m);
         break;
       default:
         console.log("Error: unrecognized message type: ${data.type}");
@@ -114,13 +102,13 @@ export class PongClient {
   private handleError(e: Event) {
     console.log(e);
     const data = new WebSocketError({message: e.type});
-    this.emitChangeEvent(new PongEvent<WebSocketError>(data));
+    this.emitChangeEvent(new WebSocketError(data));
   }
 
-  private emitChangeEvent(e: PongEvent<Message>): void {
+  private emitChangeEvent(m: Message): void {
     if (this.cb) {
       setTimeout(() => {
-        if (this.cb) this.cb(e);
+        if (this.cb) this.cb(m);
       });
     }
   }
