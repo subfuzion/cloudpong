@@ -45,6 +45,16 @@ export class PongApp extends P5App {
       height: number) {
     super(p5, parent, width, height);
 
+    // Message mapper used by websocket client to instantiate incoming messages
+    // and route them to handler methods on this instance.
+    // TODO: using a tuple right now, but probably want to create a dedicated
+    // type.
+    this.mapper.set("Update", [Update, this.update.bind(this)]);
+    this.mapper.set("StatsUpdate", [StatsUpdate, this.statsUpdate.bind(this)]);
+
+    // DOM elements (updated by StatsUpdate messages).
+    // This is just a temporary example; the stats will be different and
+    // rendered as part of the game UI.
     this.user = document.getElementById("user");
     this.system = document.getElementById("system");
     this.id = document.getElementById("id");
@@ -53,46 +63,35 @@ export class PongApp extends P5App {
     this.heapUsed = document.getElementById("heapUsed");
     this.external = document.getElementById("external");
 
-    // game objects
+    //
+    // Game UI (updated by Update messages).
+    //
     const table = new Table(0, 0, this.width, this.height);
     table.background = "black";
 
     const ball = new Ball(250, 100);
 
-    // TODO: this is a temporary hack for player #1
+    // TODO: this is a temporary hack for player #1; player will use actual
+    // cursor keys (currently assigned to player2).
     const player1 = new Paddle(30, 250);
     player1.upKey = 65;    // up:   'a'
     player1.downKey = 90;  // down: 'z'
 
+    // TODO: player2 is just a hack right now until player matching works.
     const player2 = new Paddle(table.width - 50, 250);
     player2.upKey = p5.UP_ARROW;
     player2.downKey = p5.DOWN_ARROW;
 
     table.add(ball, player1, player2);
 
-    // TODO: need player id assigned from server
-    player1.onchange(y => {
-      this.client!.send({
-        id: 0,
-        y: y
-      });
-    });
-    player2.onchange(y => {
-      this.client!.send({
-        id: 1,
-        y: y
-      });
-    });
+    // TODO: need actual player id assigned from server
+    player1.onchange(y => { this.client!.send({id: 0, y: y}); });
+    player2.onchange(y => { this.client!.send({id: 1, y: y}); });
 
     this.table = table;
     this.ball = ball;
     this.player1 = player1;
     this.player2 = player2;
-
-    // Message mappers used by client to instantiate incoming messages and
-    // route to their handlers.
-    this.mapper.set("Update", [Update, this.update.bind(this)]);
-    this.mapper.set("StatsUpdate", [StatsUpdate, this.statsUpdate.bind(this)]);
   }
 
   override setup() {

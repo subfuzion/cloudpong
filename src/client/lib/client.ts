@@ -109,6 +109,8 @@ export class PongClient {
       throw new Error(`unrecognized message type: ${data.type}`);
     }
 
+    // TODO: wanted to destructure type and handler, but types are fighting me.
+    // Revisit later.
     const type = this.mapper.get(data.type)![0];
     const m = new type!(data);
     const handler = this.mapper.get(data.type)![1];
