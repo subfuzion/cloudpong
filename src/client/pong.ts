@@ -130,7 +130,7 @@ export class PongApp extends P5App {
   private onWebSocketError(m: WebSocketError) {
     console.log(m);
     // TODO: Strategy: Try to reconnect a few times, stop game, ? Throw for now.
-    throw new Error(`WebSocketError: ${m.message});
+    throw new Error(`WebSocketError: ${m.message}`);
   }
 
   private onUpdate(m: Update): void {
