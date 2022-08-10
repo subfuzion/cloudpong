@@ -1,18 +1,12 @@
 import * as http from "http";
-import {
-  WebSocket,
-  WebSocketServer
-} from "ws";
-import {Connections} from "./connections.js";
+import {WebSocket, WebSocketServer} from "ws";
+import {Message, StatsUpdate} from "../../common/pong/messages.js";
 import {Client} from "./client";
+import {Connections} from "./connections.js";
 import {PongEngine} from "./engine.js";
-import {
-  Message,
-  StatsUpdate
-} from "../../common/pong/messages.js";
 
 
-export class PongWebSocketServer {
+export class PongServer {
   readonly server: http.Server;
   readonly wss: WebSocketServer;
   readonly connections = new Connections();
@@ -57,9 +51,13 @@ export class PongWebSocketServer {
     });
   }
 
-  close(callback?: (err?: Error) => void): PongWebSocketServer {
-    if (callback) this.server.close(callback);
-    return this;
+  async close(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.server.close(err => {
+        if (err) return reject(err);
+        resolve();
+      });
+    });
   }
 
   // stats generator.
