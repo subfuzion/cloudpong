@@ -61,30 +61,36 @@ export class Connections extends EventEmitter {
   }
 
   // Simple broadcast to all clients.
-  broadcast(message: any): void {
+  broadcast(message: string): void {
     for (const client of this.connections.values()) {
-      client.send(message, (err) => {
-        console.log(err);
-      });
+      client.send(message);
     }
   }
 
   // Broadcast to all clients using a generator function.
-  broadcastg(g: Generator<[Client, any]>): void {
+  broadcastg(g: Generator<[Client, string]>): void {
     for (const [client, message] of g) {
-      client.send(message, err => {
-        if (err) console.log(err);
-      });
+      client.send(message);
     }
   }
 
   startBroadcasting(
-      g: () => Generator<[Client, any]>,
+      g: () => Generator<[Client, string]>,
       intervalMs: number): void {
     this.intervalId = setInterval(() => this.broadcastg(g()), intervalMs);
   }
 
-  stopBroadcasting() {
+  stopBroadcasting(): void {
     clearInterval(this.intervalId);
+  }
+
+  close(): Promise<void> {
+    return new Promise(resolve => {
+      this.stopBroadcasting();
+      for (const [ws] of this.connections) {
+        ws.close();
+      }
+      resolve();
+    });
   }
 }

@@ -52,7 +52,8 @@ export class PongServer {
   }
 
   async close(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
+      await this.connections.close();
       this.server.close(err => {
         if (err) return reject(err);
         resolve();
@@ -91,7 +92,8 @@ export class PongServer {
 
     game.onStateChange((m: Message) => {
       // console.log(m);
-      ws.send(JSON.stringify(m));
+      //ws.send(JSON.stringify(m));
+      client.sendMessage(m);
     });
 
     ws.on("message", data => {
