@@ -73,13 +73,8 @@ export class PongEngine {
     }
   }
 
-  private fireStateChange(e: Message): void {
-    if (this.cb) {
-      const self = this;
-      setTimeout(() => {
-        if (self.cb) self.cb(e);
-      });
-    }
+  private emitStateChange(e: Message): void {
+    if (this.cb) this.cb(e);
   }
 
   private update() {
@@ -136,6 +131,6 @@ export class PongEngine {
       paddle1y: this.paddle1.y,
       paddle2y: this.paddle2.y,
     });
-    this.fireStateChange(e);
+    this.emitStateChange(e);
   }
 }

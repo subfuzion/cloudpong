@@ -36,10 +36,10 @@ export class Paddle extends Sprite {
   override update(g: GraphicsContext): void {
     // TODO: handle extended keydown to accelerate paddle?
     if (g.p5.keyIsDown(this.downKey) && this.y < g.height - this.height - 5) {
-      this.fireChangeEvent(1);
+      this.emitChangeEvent(1);
     }
     if (g.p5.keyIsDown(this.upKey) && this.y > 5) {
-      this.fireChangeEvent(-1);
+      this.emitChangeEvent(-1);
     }
     super.update(g);
   }
@@ -48,11 +48,7 @@ export class Paddle extends Sprite {
     this.cb = cb;
   }
 
-  private fireChangeEvent(y: number): void {
-    if (this.cb) {
-      setTimeout(() => {
-        if (this.cb) this.cb(y);
-      }, 0);
-    }
+  private emitChangeEvent(y: number): void {
+    if (this.cb) this.cb(y);
   }
 }

@@ -126,6 +126,6 @@ export class PongClient {
   }
 
   private emitMessage(handler: (me: Message) => void, m: Message): void {
-    setTimeout(() => handler(m));
+    handler(m);
   }
 }
