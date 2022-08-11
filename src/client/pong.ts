@@ -29,8 +29,8 @@ export class PongApp extends P5App {
   // game objects
   table: Table;
   ball: Ball;
-  player1: Paddle;
-  player2: Paddle;
+  paddle1: Paddle;
+  paddle2: Paddle;
 
   // Maps message type to a [message class, message handler].
   mapper = new Map<string, [{ new(data: object): Message; }, (m: any) => void]>;
@@ -57,28 +57,28 @@ export class PongApp extends P5App {
 
     const ball = new Ball(250, 100);
 
-    // TODO: this is a temporary hack for player #1; player will use actual
+    // TODO: this is a temporary hack for player1; player1 will use actual
     // cursor keys (currently assigned to player2).
-    const player1 = new Paddle(30, 250);
-    player1.upKey = 65;    // up:   'a'
-    player1.downKey = 90;  // down: 'z'
+    const paddle1 = new Paddle(30, 250);
+    paddle1.upKey = 65;    // up:   'a'
+    paddle1.downKey = 90;  // down: 'z'
 
     // TODO: player2 is a hack right now until player matching works (and maybe
     // single player mode).
-    const player2 = new Paddle(table.width - 50, 250);
-    player2.upKey = p5.UP_ARROW;
-    player2.downKey = p5.DOWN_ARROW;
+    const paddle2 = new Paddle(table.width - 50, 250);
+    paddle2.upKey = p5.UP_ARROW;
+    paddle2.downKey = p5.DOWN_ARROW;
 
-    table.add(ball, player1, player2);
+    table.add(ball, paddle1, paddle2);
 
     // TODO: need actual player id assigned from server.
-    player1.onchange(y => { this.client!.send({id: 0, y: y}); });
-    player2.onchange(y => { this.client!.send({id: 1, y: y}); });
+    paddle1.onchange(y => { this.client!.send({id: 0, y: y}); });
+    paddle2.onchange(y => { this.client!.send({id: 1, y: y}); });
 
     this.table = table;
     this.ball = ball;
-    this.player1 = player1;
-    this.player2 = player2;
+    this.paddle1 = paddle1;
+    this.paddle2 = paddle2;
 
     // Message handling.
     //
@@ -93,7 +93,6 @@ export class PongApp extends P5App {
     this.mapper.set(
         "WebSocketError",
         [WebSocketError, this.onWebSocketError.bind(this)]);
-
   }
 
   override setup() {
@@ -130,8 +129,8 @@ export class PongApp extends P5App {
     this.ball.y = m.y;
     this.ball.vx = m.vx;
     this.ball.vy = m.vy;
-    this.player1.y = m.player1y;
-    this.player2.y = m.player2y;
+    this.paddle1.y = m.paddle1y;
+    this.paddle2.y = m.paddle2y;
   }
 
   private onStatsUpdate(m: StatsUpdate): void {

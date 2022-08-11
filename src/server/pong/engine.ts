@@ -21,8 +21,8 @@ export class PongEngine {
   screenHeight: number;
   table: Table;
   ball: Ball;
-  player1: Paddle;
-  player2: Paddle;
+  paddle1: Paddle;
+  paddle2: Paddle;
 
   cb: ((e: Message) => void) | null = null;
 
@@ -37,15 +37,15 @@ export class PongEngine {
     this.ball.vx = 12;
     this.ball.vy = 2;
 
-    this.player1 = new Paddle(30, 250);
-    this.player1.y = (this.table.height - this.player1.height) / 2;
-    this.player1.vy = 10;
+    this.paddle1 = new Paddle(30, 250);
+    this.paddle1.y = (this.table.height - this.paddle1.height) / 2;
+    this.paddle1.vy = 10;
 
-    this.player2 = new Paddle(this.table.width - 50, 250);
-    this.player2.y = (this.table.height - this.player2.height) / 2;
-    this.player2.vy = 10;
+    this.paddle2 = new Paddle(this.table.width - 50, 250);
+    this.paddle2.y = (this.table.height - this.paddle2.height) / 2;
+    this.paddle2.vy = 10;
 
-    this.table.add(this.ball, this.player1, this.player2);
+    this.table.add(this.ball, this.paddle1, this.paddle2);
   }
 
   onStateChange(cb: (e: Message) => void): void {
@@ -62,13 +62,13 @@ export class PongEngine {
   movePaddle(id: number, y: number): void {
     switch (id) {
       case 0:
-        this.player1.y += this.player1.vy * y;
+        this.paddle1.y += this.paddle1.vy * y;
         break;
       case 1:
-        this.player2.y += this.player2.vy * y;
+        this.paddle2.y += this.paddle2.vy * y;
         break;
       default:
-        console.log(`error: invalid player id: ${id}`);
+        console.log(`error: invalid paddle id: ${id}`);
         return;
     }
   }
@@ -85,8 +85,8 @@ export class PongEngine {
   private update() {
     const table = this.table;
     const ball = this.ball;
-    const player1 = this.player1;
-    const player2 = this.player2;
+    const paddle1 = this.paddle1;
+    const paddle2 = this.paddle2;
 
     // Ball bounces off the top and bottom sides of the table.
     if (ball.y > table.height - 5 || ball.y < 5) {
@@ -95,19 +95,19 @@ export class PongEngine {
 
     // If ball bounces off a paddle, reverse direction.
     let reverse = false;
-    // if ball bounces off player 1 paddle
+    // if ball bounces off paddle1
     if (
-        ball.x < player1.x + player1.width + 10 &&
-        ball.y > player1.y &&
-        ball.y < player1.y + player1.height
+        ball.x < paddle1.x + paddle1.width + 10 &&
+        ball.y > paddle1.y &&
+        ball.y < paddle1.y + paddle1.height
     ) {
       reverse = true;
     }
-    // if ball bounces off player 2 paddle
+    // if ball bounces off paddle2
     if (
-        ball.x > player2.x - 10 &&
-        ball.y > player2.y &&
-        ball.y < player2.y + player2.height
+        ball.x > paddle2.x - 10 &&
+        ball.y > paddle2.y &&
+        ball.y < paddle2.y + paddle2.height
     ) {
       reverse = true;
     }
@@ -133,8 +133,8 @@ export class PongEngine {
       y: ball.y,
       vx: ball.vx,
       vy: ball.vy,
-      player1y: this.player1.y,
-      player2y: this.player2.y,
+      paddle1y: this.paddle1.y,
+      paddle2y: this.paddle2.y,
     });
     this.fireStateChange(e);
   }

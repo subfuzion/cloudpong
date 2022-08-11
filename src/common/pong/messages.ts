@@ -64,7 +64,8 @@ export class Message {
    * @param data An object with properties to merge into this instance.
    *             Be careful: this is a shotgun, don't blow your foot off.
    *             There is no validation that data properties belong in
-   *             the instance.
+   *             the instance. Be especially careful when renaming fields
+   *             to change all usages.
    * @protected
    */
   protected merge(data: object) {
@@ -105,8 +106,8 @@ export class Update extends ServerMessage {
   y = 0;
   vx = 0;
   vy = 0;
-  player1y = 0;
-  player2y = 0;
+  paddle1y = 0;
+  paddle2y = 0;
 
   constructor(data: object) {
     super(data);
