@@ -7,7 +7,7 @@ import {Message} from "../../common/pong/messages.js";
 /**
  * A Client is a light wrapper over a websocket with a unique ID.
  */
-export class Client extends EventEmitter {
+export class Player extends EventEmitter {
   readonly ws: WebSocket;
   readonly id: string;
 

@@ -1,13 +1,14 @@
 import {EventEmitter} from "events";
 import {WebSocket} from "ws";
-import {Client} from "./client.js";
+import {Player} from "./player.js";
 
 
 /**
- * Connections maps websockets to clients.
+ * Connections provides a mapping of websockets to clients, is
+ * iterable, and supports message broadcasting.
  */
 export class Connections extends EventEmitter {
-  public readonly connections = new Map<WebSocket, Client>();
+  public readonly connections = new Map<WebSocket, Player>();
   private intervalId?: NodeJS.Timer;
 
   get size(): number {
@@ -18,7 +19,7 @@ export class Connections extends EventEmitter {
     return this.connections[Symbol.iterator];
   }
 
-  entries(): IterableIterator<[WebSocket, Client]> {
+  entries(): IterableIterator<[WebSocket, Player]> {
     return this.connections.entries();
   }
 
@@ -26,11 +27,13 @@ export class Connections extends EventEmitter {
     return this.connections.keys();
   }
 
-  values(): IterableIterator<Client> {
+  values(): IterableIterator<Player> {
     return this.connections.values();
   }
 
   add(ws: WebSocket): void {
+    const client = new Player(ws);
+    this.connections.set(ws, client);
 
     ws.on("error", err => {
       console.log("error event: " + err.message);
@@ -43,12 +46,9 @@ export class Connections extends EventEmitter {
       this.emit("wsclose", this.connections.get(ws));
       this.delete(ws);
     });
-
-    const client = new Client(ws);
-    this.connections.set(ws, client);
   }
 
-  get(ws: WebSocket): Client | undefined {
+  get(ws: WebSocket): Player | undefined {
     return this.connections.get(ws);
   }
 
@@ -56,8 +56,6 @@ export class Connections extends EventEmitter {
     console.log("delete connection");
     this.emit("wsdelete", this.connections.get(ws));
     this.connections.delete(ws);
-    process.nextTick(() => {
-    });
   }
 
   // Simple broadcast to all clients.
@@ -68,14 +66,14 @@ export class Connections extends EventEmitter {
   }
 
   // Broadcast to all clients using a generator function.
-  broadcastg(g: Generator<[Client, string]>): void {
+  broadcastg(g: Generator<[Player, string]>): void {
     for (const [client, message] of g) {
       client.send(message);
     }
   }
 
   startBroadcasting(
-      g: () => Generator<[Client, string]>,
+      g: () => Generator<[Player, string]>,
       intervalMs: number): void {
     this.intervalId = setInterval(() => this.broadcastg(g()), intervalMs);
   }
@@ -84,8 +82,12 @@ export class Connections extends EventEmitter {
     clearInterval(this.intervalId);
   }
 
+  /**
+   * Closes all connections, which should be done on a shutdown signal.
+   */
   close(): Promise<void> {
     return new Promise(resolve => {
+      // TODO: broadcast shutdown or just let clients attempt auto-reconnect?
       this.stopBroadcasting();
       for (const [ws] of this.connections) {
         ws.close();

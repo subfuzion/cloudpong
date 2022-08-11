@@ -1,9 +1,9 @@
 import * as http from "http";
 import {WebSocket, WebSocketServer} from "ws";
 import {Message, StatsUpdate} from "../../common/pong/messages.js";
-import {Client} from "./client";
 import {Connections} from "./connections.js";
 import {PongEngine} from "./engine.js";
+import {Player} from "./player";
 
 
 export class PongServer {
@@ -16,7 +16,7 @@ export class PongServer {
     this.server = server;
     this.wss = new WebSocketServer({server: server});
 
-    this.connections.on("wserror", (err: Error, client: Client) => {
+    this.connections.on("wserror", (err: Error, client: Player) => {
       console.log(`error: websocket (${client.id}):`, err);
     });
 
@@ -65,7 +65,7 @@ export class PongServer {
   // This is an example of optimizing string generation
   // (avoids using JSON.stringify inside a loop).
   // broadcast() can be invoked with different generators.
-  * stats(): Generator<[Client, string]> {
+  * stats(): Generator<[Player, string]> {
     // Get stats outside the loop and stringify early.
     // const stats = JSON.stringify(process.memoryUsage());
     // const statsPostfix = "\", \"stats\": " + stats + "}";
@@ -83,8 +83,8 @@ export class PongServer {
   }
 
   startGame(ws: WebSocket) {
-    const client = this.connections.get(ws);
-    if (!client) {
+    const player = this.connections.get(ws);
+    if (!player) {
       throw new Error(`fatal: unable to get websocket for client`);
     }
 
@@ -93,7 +93,7 @@ export class PongServer {
     game.onStateChange((m: Message) => {
       // console.log(m);
       //ws.send(JSON.stringify(m));
-      client.sendMessage(m);
+      player.sendMessage(m);
     });
 
     ws.on("message", data => {
