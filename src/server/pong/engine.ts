@@ -10,8 +10,9 @@ import {
 
 
 /**
- * PongEngine provides the authoritative state of play. This state is updated
- * on each call to `update` (determined by `frameRate`).
+ * PongEngine implements the server-side pong runtime, which provides the
+ * authoritative state of play. This state is updated on each call to `update`
+ * (determined by `frameRate`).
  */
 export class PongEngine {
   static readonly DefaultFrameRate = 30; // fps
