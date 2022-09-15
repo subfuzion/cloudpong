@@ -4,6 +4,7 @@ import {Message, StatsUpdate} from "../../common/pong/messages.js";
 import {Connections} from "./connections.js";
 import {PongEngine} from "./engine.js";
 import {Player} from "./player";
+import {RedisPublisher, RedisSubscriber} from "../pubsub/client";
 
 
 export class PongServer {
@@ -48,6 +49,20 @@ export class PongServer {
             this.intervalMs);
       }
       this.startGame(ws);
+    });
+
+    this.testPubSub();
+  }
+
+  testPubSub() {
+    let channel = "foo";
+    let publisher = new RedisPublisher().publish(channel, "Hello");
+    let subscriber = new RedisSubscriber();
+    subscriber.subscribe(channel, err => {
+      console.log(`subscriber error: ${err}`);
+    });
+    subscriber.redis.on("message", (channel: string, message: string): void => {
+      console.log(`channel: ${channel}, data: ${message}`);
     });
   }
 
