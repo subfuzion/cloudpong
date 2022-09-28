@@ -84,10 +84,10 @@ export class Connections extends EventEmitter {
 
   /**
    * Closes all connections, which should be done on a shutdown signal.
+   * Active clients will need to reconnect to a new instance.
    */
   close(): Promise<void> {
     return new Promise(resolve => {
-      // TODO: broadcast shutdown or just let clients attempt auto-reconnect?
       this.stopBroadcasting();
       for (const [ws] of this.connections) {
         ws.close();

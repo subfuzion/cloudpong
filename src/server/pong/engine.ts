@@ -49,6 +49,10 @@ export class PongEngine {
     this.table.add(this.ball, this.paddle1, this.paddle2);
   }
 
+  /**
+   * Triggered by emitStateChange
+   * @param cb The state change callback
+   */
   onStateChange(cb: (e: Message) => void): void {
     this.cb = cb;
   }
@@ -74,6 +78,11 @@ export class PongEngine {
     }
   }
 
+  /**
+   * Listener is registered with onStateChange
+   * @param e The state change message
+   * @private
+   */
   private emitStateChange(e: Message): void {
     if (this.cb) this.cb(e);
   }

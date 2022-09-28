@@ -34,9 +34,8 @@ export class Message {
       s: string): T {
     const j = JSON.parse(s);
     if (!j.type) throw new Error(`No property "type" on ${s}`);
-    if (this.name !=
-        j.type) throw new Error(`Can't parse ${j.type} as ${this.name}`);
-
+    if (type.name !=
+        j.type) throw new Error(`Can't parse ${j.type} as ${type.name}`);
     // Safe equivalent to using eval, such as:
     // const o: any = eval(`new ${this.name}`);
     const o: any = new type(j);
@@ -55,6 +54,13 @@ export class Message {
       j[key] = value;
     }
     return j;
+  }
+
+  /**
+   * Returns JSON string.
+   */
+  stringify(): string {
+    return JSON.stringify(this.toJSON());
   }
 
   /**
@@ -117,7 +123,7 @@ export class Update extends ServerMessage {
 
 
 export class StatsUpdate extends ServerMessage {
-  id = "";
+  clientId = "";
   stats: {
     cpu: {
       user: string, system: string,

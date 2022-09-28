@@ -16,7 +16,7 @@ export class Page {
   setStats(m: StatsUpdate): void {
     this.user.textContent = m.stats.cpu.user;
     this.system.textContent = m.stats.cpu.system;
-    this.id.textContent = m.id;
+    this.id.textContent = m.clientId;
     this.rss.textContent = m.stats.memory.rss;
     this.heapTotal.textContent = m.stats.memory.heapTotal;
     this.heapUsed.textContent = m.stats.memory.heapUsed;

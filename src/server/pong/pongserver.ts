@@ -1,6 +1,8 @@
 import * as http from "http";
+import {AddressInfo} from "net";
+import * as os from "os";
 import {WebSocket, WebSocketServer} from "ws";
-import {Message, StatsUpdate} from "../../common/pong/messages.js";
+import {Message, StatsUpdate, Update} from "../../common/pong/messages.js";
 import {Connections} from "./connections.js";
 import {PongEngine} from "./engine.js";
 import {Player} from "./player";
@@ -54,18 +56,6 @@ export class PongServer {
     this.testPubSub();
   }
 
-  testPubSub() {
-    let channel = "foo";
-    let publisher = new RedisPublisher().publish(channel, "Hello");
-    let subscriber = new RedisSubscriber();
-    subscriber.subscribe(channel, err => {
-      console.log(`subscriber error: ${err}`);
-    });
-    subscriber.redis.on("message", (channel: string, message: string): void => {
-      console.log(`channel: ${channel}, data: ${message}`);
-    });
-  }
-
   async close(): Promise<void> {
     return new Promise(async (resolve, reject) => {
       await this.connections.close();
@@ -76,24 +66,27 @@ export class PongServer {
     });
   }
 
-  // stats generator.
-  // This is an example of optimizing string generation
-  // (avoids using JSON.stringify inside a loop).
-  // broadcast() can be invoked with different generators.
+  /**
+   * This is a generator used to send data to the client on an
+   * interval. This is periodic update data (stats, etc.) that is
+   * not part of the actual game state.
+   */
   * stats(): Generator<[Player, string]> {
-    // Get stats outside the loop and stringify early.
-    // const stats = JSON.stringify(process.memoryUsage());
-    // const statsPostfix = "\", \"stats\": " + stats + "}";
+    let addressInfo = this.server.address() as AddressInfo;
+    let hostname = os.hostname();
+    if (addressInfo != null) {
+      console.log("========================================");
+      console.log(`${hostname}, ${addressInfo.address}, ${addressInfo.port}`);
+      console.log("========================================");
+    }
     const stats = {
       cpu: process.cpuUsage(),
       memory: process.memoryUsage(),
     };
     const message = new StatsUpdate({stats: stats});
     for (const client of this.connections.values()) {
-      // No stringification, just concatenate in the loop.
-      //const message = "{\"id\": \"" + client.id + statsPostfix;
-      message.id = client.id;
-      yield [client, JSON.stringify(message)];
+      message.clientId = client.id;
+      yield [client, message.stringify()];
     }
   }
 
@@ -105,10 +98,22 @@ export class PongServer {
 
     const game = new PongEngine();
 
-    game.onStateChange((m: Message) => {
-      // console.log(m);
-      //ws.send(JSON.stringify(m));
+    let channel = player.id;
+    let publisher = new RedisPublisher();
+
+    let subscriber = new RedisSubscriber();
+    subscriber.subscribe(channel, err => {
+      console.log(`subscriber error: ${err}`);
+    });
+    subscriber.redis.on("message", (channel: string, message: string): void => {
+      console.log(`channel: ${channel}, data: ${message}`);
+      let m = Message.parseJSON(Update, message);
       player.sendMessage(m);
+    });
+
+    game.onStateChange((m: Message) => {
+      // player.sendMessage(m);
+      publisher.publish(channel, m.stringify());
     });
 
     ws.on("message", data => {
@@ -117,6 +122,18 @@ export class PongServer {
     });
 
     game.start();
+  }
+
+  testPubSub() {
+    let channel = "foo";
+    let publisher = new RedisPublisher().publish(channel, "Hello");
+    let subscriber = new RedisSubscriber();
+    subscriber.subscribe(channel, err => {
+      console.log(`subscriber error: ${err}`);
+    });
+    subscriber.redis.on("message", (channel: string, message: string): void => {
+      console.log(`channel: ${channel}, data: ${message}`);
+    });
   }
 
 }
