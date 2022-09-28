@@ -54,7 +54,7 @@ export class Table extends Container<Element> {
 
 
 export class Ball extends Element {
-  constructor(x = 0, y = 0, width = 10, height = 10) {
+  constructor(x = 0, y = 0, width = 15, height = 15) {
     super(x, y, width, height);
   }
 }

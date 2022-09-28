@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <meta content="ie=edge" http-equiv="X-UA-Compatible">
+  <title>Cloud Pong!</title>
+
+  <link href="favicon/apple-touch-icon.png" rel="apple-touch-icon"
+        sizes="180x180">
+  <link href="favicon/favicon-32x32.png" rel="icon" sizes="32x32"
+        type="image/png">
+  <link href="favicon/favicon-16x16.png" rel="icon" sizes="16x16"
+        type="image/png">
+  <link href="favicon/site.webmanifest" rel="manifest">
+
+  <style>
+    body {
+      color: #C0C0C0;
+      background-color: #202020;
+    }
+    /*
+    tr > * + * {
+      padding-left: 5em;
+    }
+    */
+    td:first-child{ width: 160px; }
+  </style>
+</head>
+<script
+  crossorigin="anonymous"
+  integrity="sha512-NxocnqsXP3zm0Xb42zqVMvjQIktKEpTIbCXXyhBPxqGZHqhcOXHs4pXI/GoZ8lE+2NJONRifuBpi9DxC58L0Lw=="
+  referrerpolicy="no-referrer"
+  src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.1/p5.min.js">
+</script>
+
+<div class="container">
+  <div id="pong"></div>
+</div>
+<div>
+  Wait for another player to join. Use J (down) and K (up) keys to move paddles.<br>
+  First player to score 11 points wins. Refresh browser (Ctrl|Cmd-R) to start a new game.
+</div>
+
+<h1>Stats</h1>
+
+<h3>Global</h3>
+<table>
+  <tr>
+    <td>Serverless instances</td>
+    <td id="instances">Current: , Peak: , Total:</td>
+  </tr>
+
+  <!--
+  <tr>
+    <td>Games played</td>
+    <td id="games">Active: , Peak: , Total:</td>
+  </tr>
+  -->
+
+  <tr>
+    <td>Players</td>
+    <td id="players">Current: , Peak:, Total</td>
+  </tr>
+
+  <!--
+  <tr>
+    <td>Queued players</td>
+    <td id="queue">Current: , Peak:, Avg wait time: , Dropped:, Dropped wait time:</td>
+  </tr>
+  -->
+
+  <tr>
+    <td></td>
+  </tr>
+</table>
+
+<h3>Server</h3>
+<table>
+  <tr>
+    <td>Server ID</td>
+    <td id="serverId"></td>
+  </tr>
+
+  <tr>
+    <td>Running Since</td>
+    <td id="runningSince"></td>
+  </tr>
+
+  <tr>
+    <td>Uptime</td>
+    <td id="uptime"></td>
+  </tr>
+
+  <tr>
+    <td>Active players</td>
+    <td id="serverCurrentPlayers">Current: , Peak:, Total:</td>
+  </tr>
+
+  <tr>
+    <td>Traffic</td>
+    <td id="serverTraffic">Messages: , MPS: , P95: , P99</td>
+  </tr>
+
+  <tr>
+    <td></td>
+  </tr>
+</table>
+
+<h3>Player</h3>
+<table>
+  <tr>
+    <td>Player ID</td>
+    <td id="playerId"></td>
+  </tr>
+
+  <tr>
+    <td>Player state</td>
+    <td id="playerState"></td>
+  </tr>
+
+  <tr>
+    <td>Opponent ID</td>
+    <td id="opponentId"></td>
+  </tr>
+
+  <tr>
+    <td>Traffic</td>
+    <td id="playerTraffic">Messages: , MPS: , P95: , P99</td>
+  </tr>
+
+  </tbody>
+</table>
+
+<script src="bundle.js"></script>
+</html>

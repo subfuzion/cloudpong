@@ -13,7 +13,7 @@ export class Message {
    * @param data Be careful: this is a shotgun, don't blow your foot off. There
    *             is no validation that data properties belong in the instance.
    */
-  constructor(data: object) {
+  constructor(data?: object) {
     this.merge(data);
   }
 
@@ -34,9 +34,8 @@ export class Message {
       s: string): T {
     const j = JSON.parse(s);
     if (!j.type) throw new Error(`No property "type" on ${s}`);
-    if (this.name !=
-        j.type) throw new Error(`Can't parse ${j.type} as ${this.name}`);
-
+    if (type.name !=
+        j.type) throw new Error(`Can't parse ${j.type} as ${type.name}`);
     // Safe equivalent to using eval, such as:
     // const o: any = eval(`new ${this.name}`);
     const o: any = new type(j);
@@ -58,6 +57,13 @@ export class Message {
   }
 
   /**
+   * Returns JSON string.
+   */
+  stringify(): string {
+    return JSON.stringify(this.toJSON());
+  }
+
+  /**
    * Must be called by every subclass constructor *after* calling
    * `super(data)` or values set by base class will be overwritten
    * when subclass instance properties finish initializing.
@@ -66,13 +72,12 @@ export class Message {
    *             There is no validation that data properties belong in
    *             the instance. Be especially careful when renaming fields
    *             to change all usages.
-   * @protected
    */
-  protected merge(data: object) {
+  merge(data?: object) {
     if (data) {
       const self: any = this;
       for (const [key, val] of Object.entries(data)) {
-        if (key !== "type") self[key] = val;
+        if (key !== "type" && val) self[key] = val;
       }
     }
   }
@@ -94,7 +99,7 @@ export class ClientMessage extends Message {}
 export class WebSocketError extends Message {
   message = "";
 
-  constructor(data: object) {
+  constructor(data?: object) {
     super(data);
     this.merge(data);
   }
@@ -102,37 +107,73 @@ export class WebSocketError extends Message {
 
 
 export class Update extends ServerMessage {
+  state = "INITIAL";
   x = 0;
   y = 0;
   vx = 0;
   vy = 0;
   paddle1y = 0;
   paddle2y = 0;
+  leftScore = 0;
+  rightScore = 0;
 
-  constructor(data: object) {
+  constructor(data?: object) {
     super(data);
     this.merge(data);
   }
 }
 
 
-export class StatsUpdate extends ServerMessage {
-  id = "";
-  stats: {
-    cpu: {
-      user: string, system: string,
-    }, memory: {
-      rss: string; heapTotal: string; heapUsed: string; external: string;
-    }
-  } = {
-    cpu: {
-      user: "", system: "",
-    }, memory: {
-      rss: "", heapTotal: "", heapUsed: "", external: "",
-    }
-  };
+export class GlobalStats {
+  currentInstanceCount = 0;
+  peakInstanceCount = 0;
+  totalInstanceCount = 0;
+  currentGameCount = 0;
+  peakGameCount = 0;
+  totalGameCount = 0;
+  currentPlayerCount = 0;
+  peakPlayerCount = 0;
+  totalPlayerCount = 0;
+  currentQueueCount = 0;
+  peakQueueCount = 0;
+  totalQueueCount = 0;
+  avgQueueWait = 0;
+  avgQueueWaitDropped = 0;
+  totalQueueDropped = 0;
+}
 
-  constructor(data: object) {
+
+export class ServerStats {
+  serverId = "";
+  runningSince = 0;
+  uptime = 0;
+  currentConnectionCount = 0;
+  peakConnectionCount = 0;
+  totalConnectionCount = 0;
+  messages = 0;
+  mps = 0;
+  p95 = 0;
+  p99 = 0;
+}
+
+
+export class PlayerStats {
+  playerId = "";
+  state = "";
+  opponentId = "";
+  messages = 0;
+  mps = 0;
+  p95 = 0;
+  p99 = 0;
+}
+
+
+export class StatsUpdate extends ServerMessage {
+  global = new GlobalStats();
+  server = new ServerStats();
+  player = new PlayerStats();
+
+  constructor(data?: object) {
     super(data);
     this.merge(data);
   }

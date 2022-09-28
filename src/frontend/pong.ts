@@ -1,14 +1,19 @@
 import P5, {Element} from "p5";
+
 import {
   Message, StatsUpdate, Update, WebSocketError
 } from "../common/pong/messages";
 import {PongClient} from "./lib/client";
 import {P5App} from "./lib/p5app";
-import {Ball, Paddle, Table} from "./lib/sprites";
+import {Ball, Centerline, Paddle, Score, Table} from "./lib/sprites";
 import {Page} from "./page";
 
 
 /**
+ * Essentially this is a dumb terminal that displays what its told. Only key
+ * presses (j for down, k for up) are sent to the server, where the game logic
+ * is processed (see `src/backend/pong/engine.ts`).
+ *
  * PongApp is responsible for setting up the game UI, but the UI is updated
  * according to game state messages it receives from the server (even the
  * player's paddle movements). The server is authoritative for game state.
@@ -38,7 +43,6 @@ export class PongApp extends P5App {
   // game engine client
   client?: PongClient;
 
-
   constructor(
       p5: P5,
       parent: string | Element | object,
@@ -53,27 +57,23 @@ export class PongApp extends P5App {
     // Game UI (updated by Update messages).
     //
     const table = new Table(0, 0, this.width, this.height);
-    table.background = "black";
+    table.background = [0, 0, 0, 255];
+    // TODO: need actual player id assigned from server.
+    table.onchange(y => { this.client!.send({id: 0, y: y}); });
+
+    const centerline = new Centerline();
+    centerline.background = [255, 0, 0, 255];
+    centerline.x = table.width / 2;
+    centerline.y = 0;
+    centerline.width = 0;
+    centerline.height = table.height;
 
     const ball = new Ball(250, 100);
 
-    // TODO: this is a temporary hack for player1; player1 will use actual
-    // cursor keys (currently assigned to player2).
     const paddle1 = new Paddle(30, 250);
-    paddle1.upKey = 65;    // up:   'a'
-    paddle1.downKey = 90;  // down: 'z'
-
-    // TODO: player2 is a hack right now until player matching works (and maybe
-    // single player mode).
     const paddle2 = new Paddle(table.width - 50, 250);
-    paddle2.upKey = p5.UP_ARROW;
-    paddle2.downKey = p5.DOWN_ARROW;
 
-    table.add(ball, paddle1, paddle2);
-
-    // TODO: need actual player id assigned from server.
-    paddle1.onchange(y => { this.client!.send({id: 0, y: y}); });
-    paddle2.onchange(y => { this.client!.send({id: 1, y: y}); });
+    table.add(centerline, ball, paddle1, paddle2);
 
     this.table = table;
     this.ball = ball;
@@ -81,11 +81,9 @@ export class PongApp extends P5App {
     this.paddle2 = paddle2;
 
     // Message handling.
-    //
     // Message mapper used by websocket client to instantiate incoming messages
     // and route them to handler methods on this instance.
-    // TODO: using a tuple right now, but probably want to create a dedicated
-    // type.
+    // TODO: using a tuple right now, but might want to use a dedicated type.
     this.mapper.set("Update", [Update, this.onUpdate.bind(this)]);
     this.mapper.set(
         "StatsUpdate",
@@ -98,6 +96,7 @@ export class PongApp extends P5App {
   override setup() {
     super.setup();
     const canvas = this.p5.createCanvas(this.width, this.height);
+    canvas.id("canvas");
     try {
       canvas.parent(this.parent);
     } catch (err) {
@@ -118,12 +117,9 @@ export class PongApp extends P5App {
 
   private onWebSocketError(m: WebSocketError) {
     console.log(m);
-    // TODO: Strategy: Try to reconnect a few times, stop game, ? Throw for now.
     throw new Error(`WebSocketError: ${m.message}`);
   }
 
-  // TODO: potential optimization: only report vector changes, let client
-  // compute, occasionally synchronize/reconcile?
   private onUpdate(m: Update): void {
     this.ball.x = m.x;
     this.ball.y = m.y;
@@ -131,6 +127,8 @@ export class PongApp extends P5App {
     this.ball.vy = m.vy;
     this.paddle1.y = m.paddle1y;
     this.paddle2.y = m.paddle2y;
+    this.table.leftScore = m.leftScore;
+    this.table.rightScore = m.rightScore;
   }
 
   private onStatsUpdate(m: StatsUpdate): void {

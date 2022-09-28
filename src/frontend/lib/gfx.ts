@@ -30,7 +30,7 @@ export class GraphicsContext {
  * A UIElement is the base class for elements rendered on a P5 canvas.
  */
 export interface UIElement extends Element {
-  background: string;
+  background: number[];
 
   update(g: GraphicsContext): void;
 
@@ -42,11 +42,11 @@ export interface UIElement extends Element {
  * A sprite is something that knows how to render an element on the P5 canvas.
  */
 export class Sprite extends Element implements UIElement {
-  background: string;
+  background: number[];
 
   constructor(x = 0, y = 0, width = 0, height = 0) {
     super(x, y, width, height);
-    this.background = "white";
+    this.background = [255, 255, 255, 255];
   }
 
   update(g: GraphicsContext): void {
@@ -64,11 +64,11 @@ export class Sprite extends Element implements UIElement {
  * A view is a sprite that can also renders child sprites.
  */
 export class View extends Container<Sprite> implements UIElement {
-  background: string;
+  background: number[];
 
   constructor(x = 0, y = 0, width = 0, height = 0) {
     super(x, y, width, height);
-    this.background = "white";
+    this.background = [255, 255, 255, 255];
   }
 
   update(g: GraphicsContext): void {
@@ -79,7 +79,9 @@ export class View extends Container<Sprite> implements UIElement {
     g.p5.fill(this.background);
     this.update(g);
     for (const s of this.elements) {
+      g.p5.push();
       s.paint(g);
+      g.p5.pop();
     }
   }
 }

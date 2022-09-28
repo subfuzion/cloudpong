@@ -12,7 +12,7 @@ export default env => {
   return {
     stats: "minimal",
     mode: mode,
-    entry: "./src/client/main.ts",
+    entry: "./src/frontend/main.ts",
     devtool: "inline-source-map",
     module: {
       rules: [
@@ -26,13 +26,13 @@ export default env => {
     },
     output: {
       filename: "bundle.js",
-      path: path.resolve(__dirname, "dist/server/public"),
+      path: path.resolve(__dirname, "dist/backend/public"),
     },
     plugins: [
       new CopyPlugin({
         patterns: [
           {
-            from: "./src/client", globOptions: {
+            from: "./src/frontend", globOptions: {
               ignore: ["**/*.js", "**/*.ts", "**/*.tsx"],
             }
           },
