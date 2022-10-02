@@ -1,12 +1,12 @@
 import {
   Update,
   Message
-} from "../../common/pong/messages.js";
+} from "../../../common/pong/messages.js";
 import {
   Ball,
   Paddle,
   Table
-} from "../../common/pong/elements.js";
+} from "../../../common/pong/elements.js";
 
 
 /**

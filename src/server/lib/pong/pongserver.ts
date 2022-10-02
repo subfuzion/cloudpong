@@ -2,24 +2,26 @@ import * as http from "http";
 import {AddressInfo} from "net";
 import * as os from "os";
 import {WebSocket, WebSocketServer} from "ws";
-import {Message, StatsUpdate, Update} from "../../common/pong/messages.js";
+import {Message, StatsUpdate, Update} from "../../../common/pong/messages.js";
 import {Connections} from "./connections.js";
 import {PongEngine} from "./engine.js";
-import {Player} from "./player";
-import {RedisPublisher, RedisSubscriber} from "../pubsub/client";
+import {Client} from "./client";
+import {PongMachine} from "./pongmachine";
+import {RedisPublisher, RedisSubscriber} from "../redis/client";
 
 
-export class PongServer {
+export class PongServer extends PongMachine {
   readonly server: http.Server;
   readonly wss: WebSocketServer;
   readonly connections = new Connections();
   private intervalMs = 100;
 
   constructor(server: http.Server) {
+    super();
     this.server = server;
     this.wss = new WebSocketServer({server: server});
 
-    this.connections.on("wserror", (err: Error, client: Player) => {
+    this.connections.on("wserror", (err: Error, client: Client) => {
       console.log(`error: websocket (${client.id}):`, err);
     });
 
@@ -28,11 +30,12 @@ export class PongServer {
     });
 
     this.connections.on("wsdelete", client => {
+      console.log(`delete: websocket (${client.id})`);
       if (!this.connections.size) {
         // After the last client connection is closed, clear the
         // interval to stop broadcasting stats.
         this.connections.stopBroadcasting();
-        console.log("stopped heartbeat broadcast");
+        console.log("no more connections; stopped broadcasting");
       }
     });
 
@@ -71,7 +74,7 @@ export class PongServer {
    * interval. This is periodic update data (stats, etc.) that is
    * not part of the actual game state.
    */
-  * stats(): Generator<[Player, string]> {
+  * stats(): Generator<[Client, Message]> {
     let addressInfo = this.server.address() as AddressInfo;
     let hostname = os.hostname();
     if (addressInfo != null) {
@@ -86,7 +89,7 @@ export class PongServer {
     const message = new StatsUpdate({stats: stats});
     for (const client of this.connections.values()) {
       message.clientId = client.id;
-      yield [client, message.stringify()];
+      yield [client, message];
     }
   }
 
@@ -105,6 +108,7 @@ export class PongServer {
     subscriber.subscribe(channel, err => {
       console.log(`subscriber error: ${err}`);
     });
+
     subscriber.redis.on("message", (channel: string, message: string): void => {
       console.log(`channel: ${channel}, data: ${message}`);
       let m = Message.parseJSON(Update, message);
@@ -136,4 +140,7 @@ export class PongServer {
     });
   }
 
+  addPlayerToQueue(player: Client): void {
+    throw new Error("Method not implemented.");
+  }
 }

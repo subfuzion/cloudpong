@@ -1,16 +1,25 @@
 import {EventEmitter} from "events";
 import {WebSocket} from "ws";
-import {Player} from "./player.js";
+import {Message} from "../../../common/pong/messages";
+import {Client} from "./client.js";
 
 
 /**
  * Connections provides a mapping of websockets to clients, is
  * iterable, and supports message broadcasting.
+ *
+ * Events:
+ * - wserror
+ * - wsclose
+ * - wsdelete
  */
 export class Connections extends EventEmitter {
-  public readonly connections = new Map<WebSocket, Player>();
+  public readonly connections = new Map<WebSocket, Client>();
   private intervalId?: NodeJS.Timer;
 
+  /**
+   * Returns the number of connections.
+   */
   get size(): number {
     return this.connections.size;
   }
@@ -19,7 +28,7 @@ export class Connections extends EventEmitter {
     return this.connections[Symbol.iterator];
   }
 
-  entries(): IterableIterator<[WebSocket, Player]> {
+  entries(): IterableIterator<[WebSocket, Client]> {
     return this.connections.entries();
   }
 
@@ -27,57 +36,81 @@ export class Connections extends EventEmitter {
     return this.connections.keys();
   }
 
-  values(): IterableIterator<Player> {
+  values(): IterableIterator<Client> {
     return this.connections.values();
   }
 
-  add(ws: WebSocket): void {
-    const client = new Player(ws);
+  /**
+   * Creates a Client and adds the websocket to client mapping.
+   * @param ws
+   */
+  add(ws: WebSocket): Client {
+    const client = new Client(ws);
     this.connections.set(ws, client);
 
     ws.on("error", err => {
-      console.log("error event: " + err.message);
       this.emit("wserror", err, this.connections.get(ws));
       this.delete(ws);
     });
 
     ws.on("close", () => {
-      console.log("close event");
       this.emit("wsclose", this.connections.get(ws));
       this.delete(ws);
     });
+
+    return client;
   }
 
-  get(ws: WebSocket): Player | undefined {
+  /**
+   * Returns the client associated with a websocket.
+   * @param ws
+   */
+  get(ws: WebSocket): Client | undefined {
     return this.connections.get(ws);
   }
 
+  /**
+   * Deletes the mapping for the websocket.
+   * @param ws
+   */
   delete(ws: WebSocket): void {
-    console.log("delete connection");
     this.emit("wsdelete", this.connections.get(ws));
     this.connections.delete(ws);
   }
 
-  // Simple broadcast to all clients.
-  broadcast(message: string): void {
+  /**
+   * Broadcast message to all clients.
+   */
+  broadcast(message: Message): void {
     for (const client of this.connections.values()) {
-      client.send(message);
+      client.sendMessage(message);
     }
   }
 
-  // Broadcast to all clients using a generator function.
-  broadcastg(g: Generator<[Player, string]>): void {
+  /**
+   * Broadcast to all clients using a message generator function.
+   */
+  broadcastg(g: Generator<[Client, Message]>): void {
     for (const [client, message] of g) {
-      client.send(message);
+      client.sendMessage(message);
     }
   }
 
+  /**
+   * Starts broadcasting to all clients using a Message generator
+   * function at the specified interval.
+   * @param g
+   * @param interval in milliseconds
+   */
   startBroadcasting(
-      g: () => Generator<[Player, string]>,
-      intervalMs: number): void {
-    this.intervalId = setInterval(() => this.broadcastg(g()), intervalMs);
+      g: () => Generator<[Client, Message]>,
+      interval: number): void {
+    this.intervalId = setInterval(() => this.broadcastg(g()), interval);
   }
 
+  /**
+   * Stop broadcasting to all clients.
+   */
   stopBroadcasting(): void {
     clearInterval(this.intervalId);
   }

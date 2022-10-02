@@ -6,7 +6,7 @@
 
 import {AddressInfo} from "net";
 import {app} from "./app.js";
-import {PongServer} from "./pong/pongserver.js";
+import {PongServer} from "./lib/pong/pongserver.js";
 
 
 const network = "0.0.0.0";
