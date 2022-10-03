@@ -2,7 +2,7 @@ import {EventEmitter} from "events";
 import {Redis} from "ioredis";
 
 import {createRedisClient} from "../redis/client.js";
-import {Player} from "./player.js";
+import {Player, PlayerState} from "./player.js";
 
 
 export class Match2 {
@@ -64,10 +64,10 @@ export class PlayerQueue extends EventEmitter {
     await this.publisher.publish(this.waitingChannel, p);
   }
 
-  private handleMessage(channel: string, player: Player): void {
+  private handleMessage(channel: string, player: string): void {
     if (channel === this.waitingChannel) {
       console.log(channel, player);
-      const length = this.waiting.push(player);
+      const length = this.waiting.push(JSON.parse(player) as Player);
       if (length >= 2) {
         this.matchPlayers();
       }
@@ -81,9 +81,20 @@ export class PlayerQueue extends EventEmitter {
   private matchPlayers() {
     console.log("matchPlayers");
     const player1 = this.waiting.shift()!;
+    player1.state = PlayerState.Matching;
     const player2 = this.waiting.shift()!;
+    player1.state = PlayerState.Matching;
+
+    // skip actual matching process for now...
     const match = new Match2(player1, player2);
     this.matching.push(match);
+
+    player1.state = PlayerState.Ready;
+    player1.opponent = player2.name;
+
+    player2.state = PlayerState.Ready;
+    player2.opponent = player1.name;
+
     this.firePlayersReady(match);
   }
 }

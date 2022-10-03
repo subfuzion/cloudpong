@@ -29,6 +29,6 @@ async function shutdown(signal: string) {
   process.exit();
 }
 
-["SIGTERM", "SIGINT"].forEach((sig) => {
-  process.on(sig, () => shutdown(sig));
+["SIGTERM", "SIGINT"].forEach(sig => {
+  process.on(sig, async () => await shutdown(sig));
 });

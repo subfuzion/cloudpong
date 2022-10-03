@@ -1,14 +1,16 @@
-import {create} from "domain";
 import * as http from "http";
 import {AddressInfo} from "net";
 import * as os from "os";
 import {WebSocket, WebSocketServer} from "ws";
+
 import {Message, StatsUpdate, Update} from "../../../common/pong/messages.js";
 import {Connections} from "./connections.js";
 import {PongEngine} from "./engine.js";
-import {Client} from "./client";
-import {PongMachine} from "./pongmachine";
-import {createRedisClient} from "../redis/client";
+import {Client} from "./client.js";
+import {Player} from "./player.js";
+import {Match2} from "./playerqueue.js";
+import {PongMachine} from "./pongmachine.js";
+import {createRedisClient} from "../redis/client.js";
 
 
 export class PongServer extends PongMachine {
@@ -22,21 +24,20 @@ export class PongServer extends PongMachine {
     this.server = server;
     this.wss = new WebSocketServer({server: server});
 
-    this.connections.on("wserror", (err: Error, client: Client) => {
+    this.connections.on("client_error", (err: Error, client: Client) => {
       console.log(`error: websocket (${client.id}):`, err);
     });
 
-    this.connections.on("wsclose", client => {
+    this.connections.on("client_close", client => {
       console.log(`close: websocket (${client.id})`);
     });
 
-    this.connections.on("wsdelete", client => {
-      console.log(`delete: websocket (${client.id})`);
+    this.connections.on("client_delete", client => {
       if (!this.connections.size) {
         // After the last client connection is closed, clear the
         // interval to stop broadcasting stats.
         this.connections.stopBroadcasting();
-        console.log("no more connections; stopped broadcasting");
+        console.log("Connections closed; broadcasting stopped.");
       }
     });
 
@@ -44,9 +45,8 @@ export class PongServer extends PongMachine {
       console.log("websocket server listening");
     });
 
-    this.wss.on("connection", ws => {
-      console.log("websocket server connection");
-      this.connections.add(ws);
+    this.wss.on("connection", async ws => {
+      const client = this.connections.add(ws);
       if (this.connections.size === 1) {
         // Start an interval for the first client; broadcast stats every 100 ms
         // for all connected clients.
@@ -54,15 +54,17 @@ export class PongServer extends PongMachine {
             this.stats.bind(this),
             this.intervalMs);
       }
-      this.startGame(ws);
+      await this.clientConnected(client);
     });
   }
 
   async close(): Promise<void> {
-    return new Promise(async (resolve, reject) => {
+    return new Promise(async resolve => {
       await this.connections.close();
+      this.disconnect();
       this.server.close(err => {
-        if (err) return reject(err);
+        if (err) console.log(err);
+        console.log("Pong server closed");
         resolve();
       });
     });
@@ -76,11 +78,8 @@ export class PongServer extends PongMachine {
   * stats(): Generator<[Client, Message]> {
     let addressInfo = this.server.address() as AddressInfo;
     let hostname = os.hostname();
-    if (addressInfo != null) {
-      console.log("========================================");
-      console.log(`${hostname}, ${addressInfo.address}, ${addressInfo.port}`);
-      console.log("========================================");
-    }
+    // console.log(`${hostname}, ${addressInfo?.address},
+    // ${addressInfo?.port}`);
     const stats = {
       cpu: process.cpuUsage(),
       memory: process.memoryUsage(),
@@ -92,40 +91,58 @@ export class PongServer extends PongMachine {
     }
   }
 
-  startGame(ws: WebSocket) {
-    const player = this.connections.get(ws);
-    if (!player) {
-      throw new Error(`fatal: unable to get websocket for client`);
+  override startGame(match: Match2): void {
+    console.log(`start game: ${JSON.stringify(match)}`);
+    // Players actually connected to this server
+    let client;
+    const players: Player[] = [];
+    // left player ws
+    client = this.connections.findClient(match.player1.name);
+    if (client) {
+      match.player1.client = client;
+      players.push(match.player1);
+    }
+    client = this.connections.findClient(match.player2.name);
+    if (client) {
+      match.player2.client = client;
+      players.push(match.player2);
     }
 
     const game = new PongEngine();
 
-    let channel = player.id;
-    let publisher = createRedisClient();
+    for (let player of players) {
+      let channel = player.client?.id!;
+      let publisher = createRedisClient();
+      let subscriber = createRedisClient();
+      subscriber.subscribe(channel);
 
-    let subscriber = createRedisClient();
-    subscriber.subscribe(channel);
+      subscriber.on("message", (channel: string, message: string): void => {
+        // console.log(`channel: ${channel}, data: ${message}`);
+        let m = Message.parseJSON(Update, message);
+        try {
+          player.client!.sendMessage(m);
+        } catch (err) {
+          // ignore occasional write errors, continue publishing
+          // until connection is closed.
+        }
+      });
 
-    subscriber.on("message", (channel: string, message: string): void => {
-      console.log(`channel: ${channel}, data: ${message}`);
-      let m = Message.parseJSON(Update, message);
-      player.sendMessage(m);
-    });
+      game.addStateChangeListener((m: Message) => {
+        // player.sendMessage(m);
+        try {
+          publisher.publish(channel, m.stringify());
+        } catch (err) {
+          // ignore occasional write errors, continue publishing
+          // until connection is closed.
+        }
+      });
 
-    game.onStateChange((m: Message) => {
-      // player.sendMessage(m);
-      publisher.publish(channel, m.stringify());
-    });
-
-    ws.on("message", data => {
-      const m = JSON.parse(data.toString());
-      game.movePaddle(m.id, m.y);
-    });
+      player.client!.ws.on("message", data => {
+        const m = JSON.parse(data.toString());
+        game.movePaddle(m.id, m.y);
+      });
+    }
 
     game.start();
-  }
-
-  addPlayerToQueue(player: Client): void {
-    throw new Error("Method not implemented.");
   }
 }

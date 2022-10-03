@@ -1,3 +1,4 @@
+import {EventEmitter} from "events";
 import {
   Update,
   Message
@@ -26,6 +27,7 @@ export class PongEngine {
   paddle2: Paddle;
 
   cb: ((e: Message) => void) | null = null;
+  eventEmitter: EventEmitter = new EventEmitter();
 
   constructor(frameRate: number = PongEngine.DefaultFrameRate) {
     this.frameRate = frameRate;
@@ -53,8 +55,8 @@ export class PongEngine {
    * Triggered by emitStateChange
    * @param cb The state change callback
    */
-  onStateChange(cb: (e: Message) => void): void {
-    this.cb = cb;
+  addStateChangeListener(cb: (e: Message) => void): void {
+    this.eventEmitter.addListener("state", cb);
   }
 
   start() {
@@ -84,7 +86,7 @@ export class PongEngine {
    * @private
    */
   private emitStateChange(e: Message): void {
-    if (this.cb) this.cb(e);
+    this.eventEmitter.emit("state", e);
   }
 
   private update() {

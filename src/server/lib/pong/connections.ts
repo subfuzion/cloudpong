@@ -40,6 +40,13 @@ export class Connections extends EventEmitter {
     return this.connections.values();
   }
 
+  findClient(id: string): Client | undefined {
+    for (let client of this.values()) {
+      if (client.id === id) return client as Client;
+    }
+    return undefined;
+  }
+
   /**
    * Creates a Client and adds the websocket to client mapping.
    * @param ws
@@ -49,12 +56,12 @@ export class Connections extends EventEmitter {
     this.connections.set(ws, client);
 
     ws.on("error", err => {
-      this.emit("wserror", err, this.connections.get(ws));
+      this.emit("client_error", err, client);
       this.delete(ws);
     });
 
     ws.on("close", () => {
-      this.emit("wsclose", this.connections.get(ws));
+      this.emit("client_close", client);
       this.delete(ws);
     });
 
@@ -74,8 +81,9 @@ export class Connections extends EventEmitter {
    * @param ws
    */
   delete(ws: WebSocket): void {
-    this.emit("wsdelete", this.connections.get(ws));
+    const client = this.connections.get(ws);
     this.connections.delete(ws);
+    if (client) this.emit("client_delete", client);
   }
 
   /**
@@ -119,13 +127,17 @@ export class Connections extends EventEmitter {
    * Closes all connections, which should be done on a shutdown signal.
    * Active clients will need to reconnect to a new instance.
    */
-  close(): Promise<void> {
+  async close(): Promise<void> {
     return new Promise(resolve => {
       this.stopBroadcasting();
       for (const [ws] of this.connections) {
         ws.close();
       }
-      resolve();
+      // Wait a second for websocket connections to close.
+      setInterval(() => {
+        this.connections.clear();
+        resolve();
+      }, 1000);
     });
   }
 }

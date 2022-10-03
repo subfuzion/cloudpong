@@ -1,8 +1,9 @@
 import * as os from "os";
 import {v4 as uuid} from "uuid";
+import {Client} from "./client";
 
 
-enum PlayerState {
+export enum PlayerState {
   Waiting = "WAITING",
   Matching = "MATCHING",
   Ready = "READY",
@@ -11,15 +12,18 @@ enum PlayerState {
 
 
 export class Player {
-  name: string = uuid();
+  name: string;
   server: string = os.hostname();
   state: PlayerState = PlayerState.Waiting;
-  opponent: Player | undefined = undefined;
+  opponent: string | undefined = undefined;
+
+  client: Client | undefined;
+  channel: string | undefined;
 
   /**
    * @param name For now, use client.id as name
    */
-  constructor(name: string | undefined = undefined) {
-    if (name) this.name = name;
+  constructor(name: string) {
+    this.name = name;
   }
 }

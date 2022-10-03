@@ -14,7 +14,7 @@
     "serve-watch-frontend": "webpack server --env MODE=development --env PONGHOST=ws://localhost:8081",
     "✅ BACKEND ⬇": ":",
     "tsc": "tsc",
-    "test-server": "mocha --reporter list dist/server/test/test.js",
+    "test-server": "mocha --reporter list --timeout 3000 dist/server/test/test.js",
     "test-server-watch": "npm run test-server --watch",
     "serve-watch-backend": "PORT=8081 tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node --experimental-specifier-resolution=node ./dist/server/main.js\"",
     "✅ DEV ⬇": ":",
