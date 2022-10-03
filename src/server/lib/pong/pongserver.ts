@@ -1,3 +1,4 @@
+import {create} from "domain";
 import * as http from "http";
 import {AddressInfo} from "net";
 import * as os from "os";
@@ -7,7 +8,7 @@ import {Connections} from "./connections.js";
 import {PongEngine} from "./engine.js";
 import {Client} from "./client";
 import {PongMachine} from "./pongmachine";
-import {RedisPublisher, RedisSubscriber} from "../redis/client";
+import {createRedisClient} from "../redis/client";
 
 
 export class PongServer extends PongMachine {
@@ -102,14 +103,12 @@ export class PongServer extends PongMachine {
     const game = new PongEngine();
 
     let channel = player.id;
-    let publisher = new RedisPublisher();
+    let publisher = createRedisClient();
 
-    let subscriber = new RedisSubscriber();
-    subscriber.subscribe(channel, err => {
-      console.log(`subscriber error: ${err}`);
-    });
+    let subscriber = createRedisClient();
+    subscriber.subscribe(channel);
 
-    subscriber.redis.on("message", (channel: string, message: string): void => {
+    subscriber.on("message", (channel: string, message: string): void => {
       console.log(`channel: ${channel}, data: ${message}`);
       let m = Message.parseJSON(Update, message);
       player.sendMessage(m);
@@ -128,14 +127,12 @@ export class PongServer extends PongMachine {
     game.start();
   }
 
-  testPubSub() {
+  async testPubSub() {
     let channel = "foo";
-    let publisher = new RedisPublisher().publish(channel, "Hello");
-    let subscriber = new RedisSubscriber();
-    subscriber.subscribe(channel, err => {
-      console.log(`subscriber error: ${err}`);
-    });
-    subscriber.redis.on("message", (channel: string, message: string): void => {
+    let publisher = createRedisClient().publish(channel, "Hello");
+    let subscriber = createRedisClient();
+    await subscriber.subscribe(channel);
+    subscriber.on("message", (channel: string, message: string): void => {
       console.log(`channel: ${channel}, data: ${message}`);
     });
   }

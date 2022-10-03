@@ -11,7 +11,6 @@ import {Message} from "../../../common/pong/messages.js";
 export class Client extends EventEmitter {
   readonly ws: WebSocket;
   readonly id: string;
-  name: string = "";
 
   constructor(ws: WebSocket) {
     super();
