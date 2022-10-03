@@ -1,7 +1,8 @@
 import {EventEmitter} from "events";
-import {createRedisClient} from "../redis/client";
-import {Player} from "./player";
 import {Redis} from "ioredis";
+
+import {createRedisClient} from "../redis/client.js";
+import {Player} from "./player.js";
 
 
 export class Match2 {

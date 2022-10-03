@@ -2,25 +2,16 @@ import {describe, it} from "mocha";
 import assert from "node:assert/strict";
 
 import Redis from "ioredis";
-import * as os from "os";
 import {v4 as uuid} from "uuid";
+import {Player} from "../lib/pong/player.js";
+import {PlayerQueue} from "../lib/pong/playerqueue.js";
 
 
 const url = process.env.REDIS;
 if (!url) throw new Error(`REDIS environment variable not set`);
 
 
-class Player {
-  name: string = uuid();
-  server: string = os.hostname();
-
-  constructor(name: string | undefined = undefined) {
-    if (name) this.name = name;
-  }
-}
-
-
-describe("player queue tests", async () => {
+describe("player data tests", async () => {
 
   it("should set and get player in redis", async () => {
     let client = new Redis(url);
@@ -122,3 +113,22 @@ describe("player queue tests", async () => {
 
 });
 
+describe("player queue tests", () => {
+
+  it("should match players", () => {
+    const players: Player[] = [
+      new Player(uuid()),
+      new Player(uuid()),
+    ];
+
+    const queue = new PlayerQueue();
+    queue.onReady((players: Player[]) => {
+      console.log(players);
+    });
+
+    players.forEach(async player => {
+      await queue.push(player);
+    });
+  });
+
+});
