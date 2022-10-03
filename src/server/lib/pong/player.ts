@@ -14,7 +14,7 @@ export class Player {
   name: string = uuid();
   server: string = os.hostname();
   state: PlayerState = PlayerState.Waiting;
-  opponent: Player | null = null;
+  opponent: Player | undefined = undefined;
 
   /**
    * @param name For now, use client.id as name

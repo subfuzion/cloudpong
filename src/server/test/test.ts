@@ -5,6 +5,7 @@ import Redis from "ioredis";
 import {v4 as uuid} from "uuid";
 import {Player} from "../lib/pong/player.js";
 import {PlayerQueue} from "../lib/pong/playerqueue.js";
+import {createRedisClient} from "../lib/redis/client.js";
 
 
 const url = process.env.REDIS;
@@ -74,9 +75,7 @@ describe("player data tests", async () => {
     client.disconnect();
   });
 
-  it("should publish and receive players", async function () {
-    this.timeout(10000);
-
+  it("should publish and receive players", async () => {
     const publisher = new Redis(url);
     const subscriber = new Redis(url);
 
@@ -113,9 +112,9 @@ describe("player data tests", async () => {
 
 });
 
-describe("player queue tests", () => {
+describe("player queue tests", async () => {
 
-  it("should match players", () => {
+  it("should match players", async () => {
     const players: Player[] = [
       new Player(uuid()),
       new Player(uuid()),
@@ -126,9 +125,16 @@ describe("player queue tests", () => {
       console.log(players);
     });
 
-    players.forEach(async player => {
+    for (const player of players) {
       await queue.push(player);
-    });
+    }
+
+    queue.disconnect();
+
+    // clean up
+    const client = createRedisClient();
+    await client.del("players");
+    client.disconnect();
   });
 
 });

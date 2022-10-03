@@ -35,16 +35,16 @@ export class PlayerQueue extends EventEmitter {
     this.client = createRedisClient();
     this.publisher = createRedisClient();
     this.subscriber = createRedisClient();
-    this.subscriber.on("message", (_, player) => {
-      const length = this.waiting.push(player);
-      if (length >= 2) {
-        this.matchPlayers();
-      }
-    });
+    this.subscriber.subscribe(this.waitingChannel);
+
+    this.subscriber.on("message", this.handleMessage.bind(this));
   }
 
+
   disconnect(): void {
+    this.client.disconnect();
     this.publisher.disconnect();
+    this.subscriber.removeListener("message", this.handleMessage);
     this.subscriber.unsubscribe();
     this.subscriber.disconnect();
   }
@@ -63,11 +63,21 @@ export class PlayerQueue extends EventEmitter {
    * this also publishes a message to "waitingChannel".
    * @param player
    */
-  async push(player: Player) {
+  async push(player: Player): Promise<void> {
     const p = player.stringify();
     await this.client.rpush(this.playerList, p);
     await this.publisher.publish(this.waitingChannel, p);
   }
+
+  private handleMessage(channel: string, player: Player): void {
+    if (channel === this.waitingChannel) {
+      console.log(channel, player);
+      const length = this.waiting.push(player);
+      if (length >= 2) {
+        this.matchPlayers();
+      }
+    }
+  };
 
   private firePlayersReady(players: Player[]): void {
     this.emit("ready", players);
