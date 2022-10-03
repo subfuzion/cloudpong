@@ -36,7 +36,6 @@ export class PlayerQueue extends EventEmitter {
     this.publisher = createRedisClient();
     this.subscriber = createRedisClient();
     this.subscriber.subscribe(this.waitingChannel);
-
     this.subscriber.on("message", this.handleMessage.bind(this));
   }
 
@@ -49,11 +48,7 @@ export class PlayerQueue extends EventEmitter {
     this.subscriber.disconnect();
   }
 
-  onMessage(cb: (player: Player) => void): void {
-    this.subscriber.on("message", (_, player) => cb(player));
-  }
-
-  onReady(cb: (players: Player[]) => void): void {
+  onReady(cb: (match: Match2) => void): void {
     this.on("ready", cb);
   }
 
@@ -64,7 +59,7 @@ export class PlayerQueue extends EventEmitter {
    * @param player
    */
   async push(player: Player): Promise<void> {
-    const p = player.stringify();
+    const p = JSON.stringify(player);
     await this.client.rpush(this.playerList, p);
     await this.publisher.publish(this.waitingChannel, p);
   }
@@ -79,14 +74,16 @@ export class PlayerQueue extends EventEmitter {
     }
   };
 
-  private firePlayersReady(players: Player[]): void {
-    this.emit("ready", players);
+  private firePlayersReady(match: Match2): void {
+    this.emit("ready", match);
   }
 
   private matchPlayers() {
+    console.log("matchPlayers");
     const player1 = this.waiting.shift()!;
     const player2 = this.waiting.shift()!;
-    this.matching.push(new Match2(player1, player2));
-    // await this.client.
+    const match = new Match2(player1, player2);
+    this.matching.push(match);
+    this.firePlayersReady(match);
   }
 }

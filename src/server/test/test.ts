@@ -4,7 +4,7 @@ import assert from "node:assert/strict";
 import Redis from "ioredis";
 import {v4 as uuid} from "uuid";
 import {Player} from "../lib/pong/player.js";
-import {PlayerQueue} from "../lib/pong/playerqueue.js";
+import {Match2, PlayerQueue} from "../lib/pong/playerqueue.js";
 import {createRedisClient} from "../lib/redis/client.js";
 
 
@@ -12,7 +12,7 @@ const url = process.env.REDIS;
 if (!url) throw new Error(`REDIS environment variable not set`);
 
 
-describe("player data tests", async () => {
+describe.skip("player data tests", async () => {
 
   it("should set and get player in redis", async () => {
     let client = new Redis(url);
@@ -121,8 +121,8 @@ describe("player queue tests", async () => {
     ];
 
     const queue = new PlayerQueue();
-    queue.onReady((players: Player[]) => {
-      console.log(players);
+    queue.onReady((match: Match2) => {
+      console.log(`ready: ${JSON.stringify(match)}`);
     });
 
     for (const player of players) {

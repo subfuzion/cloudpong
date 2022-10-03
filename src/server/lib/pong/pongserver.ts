@@ -56,8 +56,6 @@ export class PongServer extends PongMachine {
       }
       this.startGame(ws);
     });
-
-    this.testPubSub();
   }
 
   async close(): Promise<void> {
@@ -125,16 +123,6 @@ export class PongServer extends PongMachine {
     });
 
     game.start();
-  }
-
-  async testPubSub() {
-    let channel = "foo";
-    let publisher = createRedisClient().publish(channel, "Hello");
-    let subscriber = createRedisClient();
-    await subscriber.subscribe(channel);
-    subscriber.on("message", (channel: string, message: string): void => {
-      console.log(`channel: ${channel}, data: ${message}`);
-    });
   }
 
   addPlayerToQueue(player: Client): void {
