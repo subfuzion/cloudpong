@@ -34,9 +34,19 @@ npm run dev
 
 ### To deploy:
 
-1. [Select or create a Cloud Platform project](https://console.cloud.google.com/project)
+Prerequisites
+
+1. [Create an account and a database on Upstash](https://docs.upstash.com/redis)
    .
-2. [Enable billing for your project](https://support.google.com/cloud/answer/6293499#enable-billing) (
+
+   Choose the regional database: `US-CENTRAL-1. This is currently the only
+   choice for Upstash. This region generally should coincide with the
+   [Google Cloud region](https://cloud.google.com/compute/docs/regions-zones)
+   that you'll use for Cloud Run for optimal performance. Don't choose the
+   Global option.
+2. [Select or create a Cloud Platform project](https://console.cloud.google.com/project)
+   .
+3. [Enable billing for your project](https://support.google.com/cloud/answer/6293499#enable-billing) (
    learn more about [Google's Free Tier](https://cloud.google.com/free)).
 
 Set environment variables for
@@ -44,6 +54,7 @@ Set environment variables for
 * `PROJECT`
 * `REGION`
 * `SERVICE`
+* `REDIS`
 
 For example:
 
@@ -51,6 +62,7 @@ For example:
 export PROJECT=my-cloud-pong-project
 export REGION=us-central1
 export SERVICE=pong
+export REDIS=redis://:PASSWORD@gusc1-whole-stork-30425.upstash.io:30425
 ```
 
 From the project root directory, run the following script and enable APIs, as
@@ -59,6 +71,12 @@ prompted:
 ```text
 scripts/run-deploy
 ```
+
+After a successful deployment, the application URL will be printed to the
+output.
+
+[![cloudpong-screenshot](doc/cloudpong-screenshot.png)]
+
 
 <!-- reference links -->
 
