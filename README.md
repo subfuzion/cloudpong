@@ -75,7 +75,7 @@ scripts/run-deploy
 After a successful deployment, the application URL will be printed to the
 output.
 
-[![cloudpong-screenshot](doc/cloudpong-screenshot.png)]
+![cloudpong-screenshot](doc/cloudpong-screenshot.png)
 
 
 <!-- reference links -->
