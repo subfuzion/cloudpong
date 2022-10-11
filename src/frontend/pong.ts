@@ -58,8 +58,13 @@ export class PongApp extends P5App {
     //
     const table = new Table(0, 0, this.width, this.height);
     table.background = [0, 0, 0, 255];
-    // TODO: need actual player id assigned from server.
+
+    /////////
+    // This is the only message we need to send to the server!
+    // The paddle up or down message will be used by the server game engine
+    // to determine what happens next and notify the players.
     table.onchange(y => { this.client!.send({id: 0, y: y}); });
+    /////////
 
     const centerline = new Centerline();
     centerline.background = [255, 0, 0, 255];
@@ -120,6 +125,12 @@ export class PongApp extends P5App {
     throw new Error(`WebSocketError: ${m.message}`);
   }
 
+  /**
+   * Basically the frontend is just a "dumb" terminal -- all it does is use
+   * messages from the server to update sprites.
+   * @param m
+   * @private
+   */
   private onUpdate(m: Update): void {
     this.ball.x = m.x;
     this.ball.y = m.y;
